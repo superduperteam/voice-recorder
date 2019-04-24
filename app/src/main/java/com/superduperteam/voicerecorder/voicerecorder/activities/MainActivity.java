@@ -1,6 +1,7 @@
 package com.superduperteam.voicerecorder.voicerecorder.activities;
 
 import android.Manifest;
+import android.content.Intent;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Bundle;
@@ -69,7 +70,23 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public boolean onNavigationItemSelected(MenuItem menuItem) {
                         // set item as selected to persist highlight
-                        menuItem.setChecked(true);
+                        int id = menuItem.getItemId();
+
+                        switch (id) {
+                            case R.id.nav_recorder:
+                                //Do some thing here
+                                // add navigation drawer item onclick method here
+                                break;
+                            case R.id.nav_recordings:
+                                Intent intent = new Intent(MainActivity.this, RecordingsActivity.class);
+                                startActivity(intent);
+                                break;
+                            case R.id.nav_settings:
+                                //Do some thing here
+                                // add navigation drawer item onclick method here
+                                break;
+                        }
+
                         // close drawer when item is tapped
                         drawerLayout.closeDrawers();
 
