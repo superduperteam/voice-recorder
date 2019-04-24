@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="16dp"
+    >
+
+    <!--<ImageView-->
+        <!--android:id="@+id/playImagePlace"-->
+        <!--android:layout_width="75dp"-->
+        <!--android:layout_height="75dp"-->
+        <!--android:src="@mipmap/ic_launcher" />-->
+
+    <ImageButton
+        android:id="@+id/playImagePlace"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:background="@drawable/ic_record_button"
+        android:onClick="onRecordClick" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        >
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/recordingTitle"
+
+            android:text="Main Title"
+            android:textColor="#000"
+            android:textSize="20sp"
+            android:layout_margin="5dp"
+            android:layout_marginBottom="2dp"
+            />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/recordingDuration"
+            android:text="5:00"
+            android:textColor="#000"
+            android:textSize="20sp"
+            android:layout_margin="5dp"
+            android:layout_marginTop="1dp"
+            />
+    </LinearLayout>
+
+</LinearLayout>
