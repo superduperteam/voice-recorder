@@ -23,7 +23,7 @@
                                 <PersistentState>
                                   <option name="values">
                                     <map>
-                                      <entry key="url" value="jar:file:/C:/Program%20Files/Android/Android%20Studio/plugins/android/lib/android.jar!/images/material_design_icons/action/ic_delete_black_24dp.xml" />
+                                      <entry key="url" value="jar:file:/C:/Program%20Files/Android/Android%20Studio/plugins/android/lib/android.jar!/images/material_design_icons/av/ic_play_arrow_black_24dp.xml" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -34,8 +34,8 @@
                         <option name="values">
                           <map>
                             <entry key="assetSourceType" value="FILE" />
-                            <entry key="outputName" value="ic_play_arrow_triangle_alt2" />
-                            <entry key="sourceFile" value="C:\Users\Saar\AndroidStudioProjects\voice-recorder\app\src\main\res\drawable\play-arrow-triangle-in-circular-button-outline.svg" />
+                            <entry key="outputName" value="ic_trim" />
+                            <entry key="sourceFile" value="C:\Users\Saar\AndroidStudioProjects\voice-recorder\app\src\main\res\drawable\scissors-cutting-svgrepo-com.svg" />
                           </map>
                         </option>
                       </PersistentState>

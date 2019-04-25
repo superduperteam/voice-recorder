@@ -71,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
                     public boolean onNavigationItemSelected(MenuItem menuItem) {
                         // set item as selected to persist highlight
                         int id = menuItem.getItemId();
+                        Intent intent;
 
                         switch (id) {
                             case R.id.nav_recorder:
@@ -78,12 +79,12 @@ public class MainActivity extends AppCompatActivity {
                                 // add navigation drawer item onclick method here
                                 break;
                             case R.id.nav_recordings:
-                                Intent intent = new Intent(MainActivity.this, RecordingsActivity.class);
+                                intent = new Intent(MainActivity.this, RecordingsActivity.class);
                                 startActivity(intent);
                                 break;
                             case R.id.nav_settings:
-                                //Do some thing here
-                                // add navigation drawer item onclick method here
+                                intent = new Intent(MainActivity.this, RecordingPlayerActivity.class);
+                                startActivity(intent);
                                 break;
                         }
 
