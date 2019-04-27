@@ -3,9 +3,10 @@ package com.superduperteam.voicerecorder.voicerecorder.activities.settingsActivi
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import com.superduperteam.voicerecorder.voicerecorder.BaseActivity;
 import com.superduperteam.voicerecorder.voicerecorder.R;
 
-public class SettingsActivity extends AppCompatActivity {
+public class SettingsActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

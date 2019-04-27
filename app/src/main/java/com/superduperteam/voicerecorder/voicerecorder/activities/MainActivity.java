@@ -53,8 +53,8 @@ public class MainActivity extends BaseActivity {
         LayoutInflater inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         //inflate your activity layout here!
-        View contentView = inflater.inflate(R.layout.screen1, null, false);
-        mDrawer.addView(contentView, 0);
+        View contentView = inflater.inflate(R.layout.activity_main, null, false);
+        mDrawer.addView(contentView, 1);
 //        super.replaceContentLayout(R.layout.activity_main, super.C);
 
 //        Toolbar toolbar = findViewById(R.id.toolbar);
@@ -73,63 +73,7 @@ public class MainActivity extends BaseActivity {
         ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
 
 
-//        NavigationView navigationView = findViewById(R.id.nav_view);
-//        navigationView.setNavigationItemSelectedListener(
-//                new NavigationView.OnNavigationItemSelectedListener() {
-//                    @Override
-//                    public boolean onNavigationItemSelected(MenuItem menuItem) {
-//                        // set item as selected to persist highlight
-//                        int id = menuItem.getItemId();
-//                        Intent intent;
-//
-//                        switch (id) {
-//                            case R.id.nav_recorder:
-//                                //Do some thing here
-//                                // add navigation drawer item onclick method here
-//                                break;
-//                            case R.id.nav_recordings:
-//                                intent = new Intent(MainActivity.this, RecordingsActivity.class);
-//                                startActivity(intent);
-//                                break;
-//                            case R.id.nav_settings:
-//                                intent = new Intent(MainActivity.this, RecordingPlayerActivity.class);
-//                                startActivity(intent);
-//                                break;
-//                        }
-//
-//                        // close drawer when item is tapped
-//                        drawerLayout.closeDrawers();
-//
-//                        // Add code here to update the UI based on the item selected
-//                        // For example, swap UI fragments here
-//
-//                        return true;
-//                    }
-//                });
 
-//        drawerLayout.addDrawerListener(
-//                new DrawerLayout.DrawerListener() {
-//                    @Override
-//                    public void onDrawerSlide(View drawerView, float slideOffset) {
-//                        // Respond when the drawer's position changes
-//                    }
-//
-//                    @Override
-//                    public void onDrawerOpened(View drawerView) {
-//                        // Respond when the drawer is opened
-//                    }
-//
-//                    @Override
-//                    public void onDrawerClosed(View drawerView) {
-//                        // Respond when the drawer is closed
-//                    }
-//
-//                    @Override
-//                    public void onDrawerStateChanged(int newState) {
-//                        // Respond when the drawer motion state changes
-//                    }
-//                }
-//        );
 
         chronometer = findViewById(R.id.chronometer);
 
@@ -141,20 +85,15 @@ public class MainActivity extends BaseActivity {
         });
     }
 
-    @Override
-    protected int getLayoutToInflate() {
-        return R.layout.activity_main;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                drawerLayout.openDrawer(GravityCompat.START);
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
+//    @Override
+//    public boolean onOptionsItemSelected(MenuItem item) {
+//        switch (item.getItemId()) {
+//            case android.R.id.home:
+//                drawerLayout.openDrawer(GravityCompat.START);
+//                return true;
+//        }
+//        return super.onOptionsItemSelected(item);
+//    }
 
 
     private long lastPause;

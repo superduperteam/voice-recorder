@@ -10,15 +10,14 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
         <activity
-            android:name=".Main2Activity"
-            android:label="@string/title_activity_main2"
-            android:theme="@style/NoActionBar"></activity>
-        <activity
             android:name=".BaseActivity"
             android:label="@string/title_activity_base"
-            android:theme="@style/NoActionBar" />
+            android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+            >
+        </activity>
         <activity android:name=".activities.RecordingPlayerActivity" />
-        <activity android:name=".activities.MainActivity">
+        <activity android:name=".activities.MainActivity"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
