@@ -1,23 +1,27 @@
 package com.superduperteam.voicerecorder.voicerecorder.activities;
 
 import android.Manifest;
+import android.content.Intent;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
+import android.media.audiofx.Visualizer;
 import android.os.Bundle;
 import android.os.SystemClock;
-import android.support.design.widget.NavigationView;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Chronometer;
 import android.widget.ImageButton;
 
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+
+import com.google.android.material.navigation.NavigationView;
 import com.superduperteam.voicerecorder.voicerecorder.R;
+import com.superduperteam.voicerecorder.voicerecorder.activities.settingsActivity.SettingsActivity;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -32,8 +36,8 @@ public class MainActivity extends AppCompatActivity {
     private static String fileName = null;
 
     private MediaRecorder recorder = null;
-
-    private MediaPlayer player = null;
+    private MediaPlayer mediaPlayer = null;
+    private Visualizer mVisualizer;
 
     // Requesting permission to RECORD_AUDIO
     private boolean permissionToRecordAccepted = false;
@@ -46,6 +50,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //TODO: init MediaPlayer and play the audio
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -115,6 +121,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+        if (mVisualizer != null)
+            mVisualizer.release();
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
@@ -154,5 +167,10 @@ public class MainActivity extends AppCompatActivity {
             chronometer.setBase(chronometer.getBase() + SystemClock.elapsedRealtime() - lastPause);
         }
         chronometer.start();
+    }
+
+    public void onSettingsClick(MenuItem item) {
+        Intent myIntent = new Intent(getBaseContext(),   SettingsActivity.class);
+        startActivity(myIntent);
     }
 }

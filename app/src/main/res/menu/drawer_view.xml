@@ -9,6 +9,7 @@
             android:title="Recordings" />
         <item
             android:id="@+id/nav_slideshow"
-            android:title="Settings" />
+            android:title="Settings"
+            android:onClick="onSettingsClick"/>
     </group>
 </menu>
