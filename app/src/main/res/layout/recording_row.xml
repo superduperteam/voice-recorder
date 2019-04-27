@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp">
+
+    <!--<ImageView-->
+    <!--android:id="@+id/playImagePlace"-->
+    <!--android:layout_width="75dp"-->
+    <!--android:layout_height="75dp"-->
+    <!--android:src="@mipmap/ic_launcher" />-->
+
+    <TextView
+        android:id="@+id/recordingDuration"
+        android:layout_width="160dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="5:30"
+        android:textColor="#000"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="@+id/recordingTitle"
+        app:layout_constraintTop_toBottomOf="@+id/recordingTitle" />
+
+    <TextView
+        android:id="@+id/recordingTitle"
+        android:layout_width="168dp"
+        android:layout_height="wrap_content"
+
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="6dp"
+        android:padding="0dp"
+        android:paddingStart="0dp"
+        android:paddingLeft="0dp"
+        android:paddingTop="0dp"
+        android:paddingEnd="0dp"
+        android:paddingRight="0dp"
+        android:paddingBottom="0dp"
+        android:text="Main Title"
+        android:textColor="#000"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/recordingsPlayImagePlace"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageButton
+        android:id="@+id/recordingsPlayImagePlace"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/ic_play_arrow_triangle_alt1"
+        android:onClick="onPlayClick"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageButton
+        android:id="@+id/recordingBookmarksPlace"
+        android:layout_width="23dp"
+        android:layout_height="23dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerVertical="true"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/ic_collection_bookmark"
+        android:text="3"
+        android:textColor="#000"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@+id/recordingDate"
+        app:layout_constraintEnd_toStartOf="@+id/recordingsMoreOptions"
+        app:layout_constraintHorizontal_bias="0.275"
+        app:layout_constraintStart_toEndOf="@+id/recordingBookmarksCount2"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.933" />
+
+    <TextView
+        android:id="@+id/recordingBookmarksCount2"
+        android:layout_width="9dp"
+        android:layout_height="23dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="56dp"
+        android:text="3"
+        android:textColor="#000"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@+id/recordingDate"
+        app:layout_constraintStart_toEndOf="@+id/recordingTitle" />
+
+    <TextView
+        android:id="@+id/recordingDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="32dp"
+        android:text="4.24.2019"
+        android:textColor="#000"
+        android:textSize="16sp"
+        app:layout_constraintStart_toEndOf="@+id/recordingDuration"
+        app:layout_constraintTop_toBottomOf="@+id/recordingTitle" />
+
+    <ImageButton
+        android:id="@+id/recordingsMoreOptions"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="4dp"
+        android:background="@drawable/ic_more_vert_black"
+        android:onClick="onRecordClick"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

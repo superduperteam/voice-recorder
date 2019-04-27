@@ -28,7 +28,7 @@
 
         <!--Todo: Open a dialog with sign in to drive-->
         <ListPreference
-            app:defaultValue="reply"
+            app:defaultValue="blabla"
             app:entries="@array/quality_entries"
             app:entryValues="@array/quality_values"
             app:key="reply"
@@ -37,7 +37,7 @@
 
         <!--Todo: Open a dialog with date and time picker-->
         <ListPreference
-            app:defaultValue="reply"
+            app:defaultValue="blalala"
             app:entries="@array/quality_entries"
             app:entryValues="@array/quality_values"
             app:key="reply"

@@ -1,29 +1,27 @@
 package com.superduperteam.voicerecorder.voicerecorder.activities;
 
 import android.Manifest;
-import android.content.Intent;
+import android.content.Context;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
-import android.media.audiofx.Visualizer;
 import android.os.Bundle;
 import android.os.SystemClock;
-import android.view.MenuItem;
+
+import androidx.core.app.ActivityCompat;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Chronometer;
 import android.widget.ImageButton;
 
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.ActivityCompat;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
-
-import com.google.android.material.navigation.NavigationView;
+import com.superduperteam.voicerecorder.voicerecorder.BaseActivity;
 import com.superduperteam.voicerecorder.voicerecorder.R;
-import com.superduperteam.voicerecorder.voicerecorder.activities.settingsActivity.SettingsActivity;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
 
     private DrawerLayout drawerLayout;
     private Chronometer chronometer;
@@ -36,8 +34,8 @@ public class MainActivity extends AppCompatActivity {
     private static String fileName = null;
 
     private MediaRecorder recorder = null;
-    private MediaPlayer mediaPlayer = null;
-    private Visualizer mVisualizer;
+
+    private MediaPlayer player = null;
 
     // Requesting permission to RECORD_AUDIO
     private boolean permissionToRecordAccepted = false;
@@ -49,18 +47,22 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+//        setContentView(R.layout.activity_main);
+        LayoutInflater inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        //TODO: init MediaPlayer and play the audio
+        //inflate your activity layout here!
+        View contentView = inflater.inflate(R.layout.activity_main, null, false);
+        mDrawer.addView(contentView, 1);
+//        super.replaceContentLayout(R.layout.activity_main, super.C);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        ActionBar actionbar = getSupportActionBar();
-        actionbar.setDisplayHomeAsUpEnabled(true);
-        actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
-
-        drawerLayout = findViewById(R.id.drawer_layout);
+//        Toolbar toolbar = findViewById(R.id.toolbar);
+//        setSupportActionBar(toolbar);
+//
+//        ActionBar actionbar = getSupportActionBar();
+//        actionbar.setDisplayHomeAsUpEnabled(true);
+//        actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
+//
+//        drawerLayout = findViewById(R.id.drawer_layout);
 
         // Record to the external cache directory for visibility
         fileName = getExternalCacheDir().getAbsolutePath();
@@ -69,46 +71,7 @@ public class MainActivity extends AppCompatActivity {
         ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
 
 
-        NavigationView navigationView = findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(
-                new NavigationView.OnNavigationItemSelectedListener() {
-                    @Override
-                    public boolean onNavigationItemSelected(MenuItem menuItem) {
-                        // set item as selected to persist highlight
-                        menuItem.setChecked(true);
-                        // close drawer when item is tapped
-                        drawerLayout.closeDrawers();
 
-                        // Add code here to update the UI based on the item selected
-                        // For example, swap UI fragments here
-
-                        return true;
-                    }
-                });
-
-        drawerLayout.addDrawerListener(
-                new DrawerLayout.DrawerListener() {
-                    @Override
-                    public void onDrawerSlide(View drawerView, float slideOffset) {
-                        // Respond when the drawer's position changes
-                    }
-
-                    @Override
-                    public void onDrawerOpened(View drawerView) {
-                        // Respond when the drawer is opened
-                    }
-
-                    @Override
-                    public void onDrawerClosed(View drawerView) {
-                        // Respond when the drawer is closed
-                    }
-
-                    @Override
-                    public void onDrawerStateChanged(int newState) {
-                        // Respond when the drawer motion state changes
-                    }
-                }
-        );
 
         chronometer = findViewById(R.id.chronometer);
 
@@ -120,22 +83,15 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if (mVisualizer != null)
-            mVisualizer.release();
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                drawerLayout.openDrawer(GravityCompat.START);
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
+//    @Override
+//    public boolean onOptionsItemSelected(MenuItem item) {
+//        switch (item.getItemId()) {
+//            case android.R.id.home:
+//                drawerLayout.openDrawer(GravityCompat.START);
+//                return true;
+//        }
+//        return super.onOptionsItemSelected(item);
+//    }
 
 
     private long lastPause;
@@ -167,10 +123,5 @@ public class MainActivity extends AppCompatActivity {
             chronometer.setBase(chronometer.getBase() + SystemClock.elapsedRealtime() - lastPause);
         }
         chronometer.start();
-    }
-
-    public void onSettingsClick(MenuItem item) {
-        Intent myIntent = new Intent(getBaseContext(),   SettingsActivity.class);
-        startActivity(myIntent);
     }
 }
