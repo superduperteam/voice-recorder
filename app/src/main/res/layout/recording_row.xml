@@ -60,12 +60,18 @@
         android:layout_height="23dp"
         android:layout_alignParentBottom="true"
         android:layout_centerVertical="true"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
         android:background="@drawable/ic_collection_bookmark"
         android:text="3"
         android:textColor="#000"
         android:textSize="16sp"
         app:layout_constraintBottom_toTopOf="@+id/recordingDate"
-        app:layout_constraintStart_toEndOf="@+id/recordingBookmarksCount2" />
+        app:layout_constraintEnd_toStartOf="@+id/recordingsMoreOptions"
+        app:layout_constraintHorizontal_bias="0.275"
+        app:layout_constraintStart_toEndOf="@+id/recordingBookmarksCount2"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.933" />
 
     <TextView
         android:id="@+id/recordingBookmarksCount2"
@@ -73,7 +79,7 @@
         android:layout_height="23dp"
         android:layout_alignParentBottom="true"
         android:layout_centerVertical="true"
-        android:layout_marginStart="52dp"
+        android:layout_marginStart="56dp"
         android:text="3"
         android:textColor="#000"
         android:textSize="16sp"
