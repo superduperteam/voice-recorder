@@ -1,46 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.drawerlayout.widget.DrawerLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true">
+    android:fitsSystemWindows="true"
+    tools:context=".activities.RecordingPlayerActivity"
+    android:orientation="vertical">
 
-    <LinearLayout
+    tools:context=".activities.RecordingsActivity"
+    android:orientation="vertical"
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar" />
+
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".activities.RecordingsActivity"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        tools:context=".activities.RecordingsActivity">
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recordingsListView"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            android:theme="@style/ThemeOverlay.AppCompat.ActionBar" />
+            android:layout_height="match_parent" />
+    </RelativeLayout>
+</LinearLayout>
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            tools:context=".activities.RecordingsActivity">
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recordingsListView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-        </RelativeLayout>
-    </LinearLayout>
-
-
-    <com.google.android.material.navigation.NavigationView
-android:id="@+id/nav_view"
-android:layout_width="200dp"
-android:layout_height="match_parent"
-android:layout_gravity="start"
-android:fitsSystemWindows="true"
-app:menu="@menu/drawer_view"
-app:headerLayout="@layout/nav_header"/>
-    </androidx.drawerlayout.widget.DrawerLayout>
