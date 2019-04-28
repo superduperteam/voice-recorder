@@ -58,6 +58,7 @@ public class MainActivity extends BaseActivity {
 
         //inflate your activity layout here!
         View contentView = inflater.inflate(R.layout.activity_main, null, false);
+
         mDrawer.addView(contentView, 1);
 //        super.replaceContentLayout(R.layout.activity_main, super.C);
 

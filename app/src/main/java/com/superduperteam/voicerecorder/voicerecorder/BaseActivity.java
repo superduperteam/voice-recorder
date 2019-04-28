@@ -39,6 +39,7 @@ public class BaseActivity extends AppCompatActivity {
         actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
 
 
+
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(
                 new NavigationView.OnNavigationItemSelectedListener() {
@@ -58,7 +59,7 @@ public class BaseActivity extends AppCompatActivity {
                                 startActivity(intent);
                                 break;
                             case R.id.nav_settings:
-                                intent = new Intent(BaseActivity.this, SettingsActivity.class);
+                                intent = new Intent(BaseActivity.this, RecordingPlayerActivity.class);
                                 startActivity(intent);
                                 break;
                         }
