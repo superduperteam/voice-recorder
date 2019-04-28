@@ -4,6 +4,9 @@ import android.content.Context;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 
 import com.superduperteam.voicerecorder.voicerecorder.BaseActivity;
@@ -20,6 +23,29 @@ public class RecordingPlayerActivity extends BaseActivity {
         //inflate your activity layout here!
         View contentView = inflater.inflate(R.layout.activity_recording_player, null, false);
         mDrawer.addView(contentView, 0);
-
     }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.drawer_view, menu);
+        MenuItem mMenuItem = menu.findItem(R.id.app_bar_search);
+        mMenuItem.setVisible(false);
+        mMenuItem.setTitle("Deleteeeee");
+        mMenuItem.setEnabled(false);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    private MenuItem mMenuItem;
+
+//    @Override
+//    public boolean onPrepareOptionsMenu(Menu menu) {
+//
+//        invalidateOptionsMenu();
+//        menu.findItem(R.id.app_bar_search).setVisible(false);
+//        menu.findItem(R.id.app_bar_search).setVisible(true);
+//        return super.onPrepareOptionsMenu(menu);
+//    }
+
 }

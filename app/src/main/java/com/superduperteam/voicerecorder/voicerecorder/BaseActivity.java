@@ -8,6 +8,8 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
@@ -37,7 +39,6 @@ public class BaseActivity extends AppCompatActivity {
         ActionBar actionbar = getSupportActionBar();
         actionbar.setDisplayHomeAsUpEnabled(true);
         actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
-
 
 
         NavigationView navigationView = findViewById(R.id.nav_view);
@@ -100,7 +101,7 @@ public class BaseActivity extends AppCompatActivity {
 
     }
 
-        @Override
+    @Override
         public boolean onOptionsItemSelected(MenuItem item) {
             switch (item.getItemId()) {
                 case android.R.id.home:
