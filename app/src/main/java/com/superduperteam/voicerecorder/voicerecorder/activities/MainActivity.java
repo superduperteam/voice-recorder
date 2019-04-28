@@ -5,6 +5,7 @@ import android.content.Context;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.SystemClock;
 
 import androidx.core.app.ActivityCompat;
@@ -24,6 +25,7 @@ import com.superduperteam.voicerecorder.voicerecorder.BaseActivity;
 import com.superduperteam.voicerecorder.voicerecorder.R;
 
 import java.io.IOException;
+import java.util.Objects;
 
 public class MainActivity extends BaseActivity {
 
@@ -31,6 +33,8 @@ public class MainActivity extends BaseActivity {
     private Chronometer chronometer;
     //private boolean isStart;
     private boolean isRecording = false;
+    private String outputFormat = ".3gp";
+    private int recordingNum = 0;
 
     //voice recorder
     private static final String LOG_TAG = "AudioRecordTest";
@@ -69,13 +73,19 @@ public class MainActivity extends BaseActivity {
         // Record to the external cache directory for visibility
 //        fileName = getExternalCacheDir().getAbsolutePath();
 //        fileName += "/audiorecordtest.3gp";
-        fileName = getExternalFilesDir(null).getAbsolutePath();
-        fileName += "/audiorecordtest.3gp";
-        Log.i(LOG_TAG,  "filePath: " + fileName);
 
+        isExternalStorageWritable();
         ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
-
         chronometerInit();
+    }
+
+    private String getCurrentFileName() {
+        isExternalStorageWritable();
+        fileName = Objects.requireNonNull(getExternalFilesDir(null)).getAbsolutePath();
+        fileName += "/recording" + recordingNum + outputFormat;
+        Log.i(LOG_TAG,  "filePath for recording: " + fileName);
+
+        return fileName;
     }
 
 
@@ -132,14 +142,16 @@ public class MainActivity extends BaseActivity {
     }
 
     public void onStopClick(View view) {
-        ImageButton button = findViewById(R.id.stop_button);
+        if(isRunning){
+            ImageButton button = findViewById(R.id.stop_button);
 
-        resetStopWatch();
-        stopRecording();
-        isRunning = false;
-        isRecording = false;
-        //stopStopWatch();
-    //    stopRecording();
+            resetStopWatch();
+            stopRecording();
+            isRunning = false;
+            isRecording = false;
+            //stopStopWatch();
+            //    stopRecording();
+        }
     }
 
 //    private void stopStopWatch() {
@@ -191,6 +203,7 @@ private long pauseOffset = 0;
         recorder.stop();
         recorder.release();
         recorder = null;
+        recordingNum++;
 
         startPlaying();
     }
@@ -214,7 +227,7 @@ private long pauseOffset = 0;
         recorder = new MediaRecorder();
         recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-        recorder.setOutputFile(fileName);
+        recorder.setOutputFile(getCurrentFileName());
         recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
 
         try {
@@ -233,5 +246,15 @@ private long pauseOffset = 0;
         else{
             recorder.resume();
         }
+    }
+
+    /* Checks if external storage is available for read and write */
+    public boolean isExternalStorageWritable() {
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            return true;
+        }
+        Log.e(LOG_TAG, "external storage is NOT available for read and write");
+        return false;
     }
 }
