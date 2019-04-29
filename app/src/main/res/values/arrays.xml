@@ -11,4 +11,14 @@
         <item>medium</item>
         <item>high</item>
     </string-array>
+
+    <string-array name="sort_by_attribute">
+        <item>Date</item>
+        <item>Title</item>
+    </string-array>
+
+    <string-array name="sort_ascending_or_descending">
+        <item>Ascending</item>
+        <item>Descending</item>
+    </string-array>
 </resources>
