@@ -60,7 +60,7 @@ public class BaseActivity extends AppCompatActivity {
                                 startActivity(intent);
                                 break;
                             case R.id.nav_settings:
-                                intent = new Intent(BaseActivity.this, RecordingPlayerActivity.class);
+                                intent = new Intent(BaseActivity.this, SettingsActivity.class);
                                 startActivity(intent);
                                 break;
                         }

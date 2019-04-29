@@ -30,13 +30,13 @@ public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenu
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_recordings);
+    //    setContentView(R.layout.activity_recordings);
 //        setContentView(R.layout.activity_recording_player);
         LayoutInflater inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         //inflate your activity layout here!
         View contentView = inflater.inflate(R.layout.activity_recordings, null, false);
-        mDrawer.addView(contentView, 0);
+        mDrawer.addView(contentView, 1);
 
 
 
@@ -79,16 +79,28 @@ public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenu
     public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()){
             case R.id.recording_clicked_delete:
-                Toast.makeText(this, "delete", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "delete from recording row", Toast.LENGTH_LONG).show();
                 return true;
             case R.id.recording_clicked_edit:
-                Toast.makeText(this, "edit", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "edit from recording row", Toast.LENGTH_LONG).show();
                 return true;
             case R.id.recording_clicked_share:
-                Toast.makeText(this, "share", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "share from recording row", Toast.LENGTH_LONG).show();
                 return true;
                 default:
                     return false;
         }
     }
+
+//    public void onShareClick(MenuItem item) {
+//        Toast.makeText(getApplicationContext(),"share", Toast.LENGTH_SHORT).show();
+//    }
+//
+//    public void onDeleteClick(MenuItem item) {
+//        Toast.makeText(getApplicationContext(),"delete", Toast.LENGTH_SHORT).show();
+//    }
+//
+//    public void onEditClick(MenuItem item) {
+//        Toast.makeText(getApplicationContext(),"edit", Toast.LENGTH_SHORT).show();
+//    }
 }
