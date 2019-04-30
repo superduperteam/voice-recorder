@@ -46,6 +46,8 @@ public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenu
         View contentView = inflater.inflate(R.layout.activity_recordings, null, false);
         mDrawer.addView(contentView, 1);
 
+
+        // Saar: I assume you would want to change this list to a list of Files taken from our directory.
         ArrayList<String> animalNames = new ArrayList<>();
         animalNames.add("Horse");
         animalNames.add("Cow");
@@ -73,7 +75,7 @@ public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenu
 //    }
 
 
-    // This is for the buttons in the top: search and sort
+    // Saar: This is to make the buttons in the top to show : search and sort
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -90,7 +92,7 @@ public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenu
     }
 
 
-    // This is for the actual list of recordings - if user click on the vertical 3 dots
+    // Saar: This is for the actual list of recordings - if user click on the vertical 3 dots.
     public void onRecordingClick(View view) {
         PopupMenu popup = new PopupMenu(this, view); // view=button
         popup.setOnMenuItemClickListener(this);
@@ -115,7 +117,7 @@ public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenu
     }
 
 
-    // This is for Sort button
+    // Saar: This is for Sort button
     public void onSortClick(MenuItem item) {
         alertSortElements();
     }

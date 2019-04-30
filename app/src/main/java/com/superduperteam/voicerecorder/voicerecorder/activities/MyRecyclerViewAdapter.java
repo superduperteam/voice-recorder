@@ -12,6 +12,10 @@ import com.superduperteam.voicerecorder.voicerecorder.R;
 
 import java.util.List;
 
+
+// Saar: took this from:
+// https://stackoverflow.com/questions/40584424/simple-android-recyclerview-example
+
 public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder> {
 
     private List<String> mData;
