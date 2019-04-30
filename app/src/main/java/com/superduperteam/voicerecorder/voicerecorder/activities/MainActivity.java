@@ -24,7 +24,14 @@ import android.widget.ImageButton;
 import com.superduperteam.voicerecorder.voicerecorder.BaseActivity;
 import com.superduperteam.voicerecorder.voicerecorder.R;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 
 public class MainActivity extends BaseActivity {
@@ -80,13 +87,36 @@ public class MainActivity extends BaseActivity {
         chronometerInit();
     }
 
-    private String getCurrentFileName() {
-        isExternalStorageWritable();
-        fileName = Objects.requireNonNull(getExternalFilesDir(null)).getAbsolutePath();
-        fileName += "/recording" + recordingNum + outputFormat;
-        Log.i(LOG_TAG,  "filePath for recording: " + fileName);
+//    private String getCurrentFileName() {
+//        isExternalStorageWritable();
+//        fileName = Objects.requireNonNull(getExternalFilesDir(null)).getAbsolutePath();
+//        fileName += "/recording" + recordingNum + outputFormat;
+//        Log.i(LOG_TAG,  "filePath for recording: " + fileName);
+//
+//        return fileName;
 
-        return fileName;
+    //Todo: problem: if we allow different audio formats: user can have recording1.3gp and recording1.mp3 for example.
+    private String getCurrentFileName() {
+        int fileNameNumber = 1;
+        isExternalStorageWritable();
+
+
+        fileName = Objects.requireNonNull(getExternalFilesDir(null)).getAbsolutePath();
+        fileName += "/Recording";
+
+        while(fileExists(getApplicationContext(), fileName +" "+ fileNameNumber + outputFormat)){// the name is already taken.. Need a different name.
+            fileNameNumber++;
+        }
+
+        Log.i(LOG_TAG,  "filePath chosen for recording: " + fileName);
+
+        return fileName +" "+ fileNameNumber + outputFormat;
+    }
+
+    public boolean fileExists(Context context, String filename) {
+      //  File file = context.getFileStreamPath(filename);
+        File file = new File(filename);
+        return file.exists();
     }
 
 
