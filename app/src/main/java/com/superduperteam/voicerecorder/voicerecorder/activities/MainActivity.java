@@ -39,14 +39,15 @@ public class MainActivity extends BaseActivity {
    // private DrawerLayout drawerLayout;
     private Chronometer chronometer;
     //private boolean isStart;
-    private boolean isRecording = false;
+    private boolean isRecording = false; // is actively recording something?
+    private String lastRecordingPath = null;
     private String outputFormat = ".3gp";
     private int recordingNum = 0;
 
     //voice recorder
     private static final String LOG_TAG = "AudioRecordTest";
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
-    private static String fileName = null;
+    private static String defaultFileName = "Recording";
 
     private MediaRecorder recorder = null;
 
@@ -96,26 +97,26 @@ public class MainActivity extends BaseActivity {
 //        return fileName;
 
     //Todo: problem: if we allow different audio formats: user can have recording1.3gp and recording1.mp3 for example.
-    private String getCurrentFileName() {
-        int fileNameNumber = 1;
+    private String getCurrentFilePath() {
         isExternalStorageWritable();
 
+        int fileNameNumber = 1;
+        String filePath = Objects.requireNonNull(getExternalFilesDir(null)).getAbsolutePath();
+        filePath += "/Recording";
 
-        fileName = Objects.requireNonNull(getExternalFilesDir(null)).getAbsolutePath();
-        fileName += "/Recording";
-
-        while(fileExists(getApplicationContext(), fileName +" "+ fileNameNumber + outputFormat)){// the name is already taken.. Need a different name.
+        while(fileExists(filePath +" "+ fileNameNumber + outputFormat)){// the name is already taken.. Need a different name.
             fileNameNumber++;
         }
 
-        Log.i(LOG_TAG,  "filePath chosen for recording: " + fileName);
+        Log.i(LOG_TAG,  "filePath chosen for recording: " + filePath);
 
-        return fileName +" "+ fileNameNumber + outputFormat;
+        return filePath +" "+ fileNameNumber + outputFormat;
     }
 
-    public boolean fileExists(Context context, String filename) {
+    public boolean fileExists(String filePath) {
       //  File file = context.getFileStreamPath(filename);
-        File file = new File(filename);
+        File file = new File(filePath);
+        //Todo: problem: Race condition ?
         return file.exists();
     }
 
@@ -153,18 +154,16 @@ public class MainActivity extends BaseActivity {
     private boolean isRunning = false;
 
     public void onRecordClick(View view) {
-        ImageButton button = findViewById(R.id.record_button);
-        button.setBackgroundResource(R.drawable.ic_pressed_record_button);
 
         if (!isRecording) {
             //startStopWatch(isFirstStart);
+            findViewById(R.id.record_button).setBackgroundResource(R.drawable.ic_pressed_record_button);
 
             startStopWatch();
             startRecording(isRunning);
             isRunning = true;
         } else {
-            //  pauseStopWatch();
-
+            findViewById(R.id.record_button).setBackgroundResource(R.drawable.ic_record_button);
             pauseStopWatch();
             pauseRecording();
         }
@@ -174,9 +173,8 @@ public class MainActivity extends BaseActivity {
 
     public void onStopClick(View view) {
         if(isRunning){
-            ImageButton button = findViewById(R.id.stop_button);
-
             resetStopWatch();
+            findViewById(R.id.record_button).setBackgroundResource(R.drawable.ic_record_button);
             stopRecording();
             isRunning = false;
             isRecording = false;
@@ -206,28 +204,23 @@ public class MainActivity extends BaseActivity {
 private long pauseOffset = 0;
 
     private void startStopWatch() {
-//        if (!running) {
+        //if (!isRunning) {
             chronometer.setBase(SystemClock.elapsedRealtime() - pauseOffset);
             chronometer.start();
-       //     running = true;
        // }
     }
 
     private void pauseStopWatch() {
-      //  if (running) {
+       if (isRunning) {
             chronometer.stop();
             pauseOffset = SystemClock.elapsedRealtime() - chronometer.getBase();
-      //      running = false;
-       // }
+        }
     }
 
     private void resetStopWatch() {
         chronometer.setBase(SystemClock.elapsedRealtime());
         chronometer.stop();
         pauseOffset = 0;
-
-        ImageButton button = findViewById(R.id.record_button);
-        button.setBackgroundResource(R.drawable.ic_record_button);
     }
 
     private void stopRecording() {
@@ -246,7 +239,7 @@ private long pauseOffset = 0;
     private void startPlaying() {
         MediaPlayer player = new MediaPlayer();
         try {
-            player.setDataSource(fileName);
+            player.setDataSource(lastRecordingPath);
             player.prepare();
             player.start();
         } catch (IOException e) {
@@ -258,7 +251,9 @@ private long pauseOffset = 0;
         recorder = new MediaRecorder();
         recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-        recorder.setOutputFile(getCurrentFileName());
+        String outputPath = getCurrentFilePath();
+        recorder.setOutputFile(outputPath);
+        lastRecordingPath = outputPath;
         recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
 
         try {
