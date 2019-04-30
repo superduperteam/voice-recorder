@@ -60,16 +60,6 @@ public class MainActivity extends BaseActivity {
         View contentView = inflater.inflate(R.layout.activity_main, null, false);
 
         mDrawer.addView(contentView, 1);
-//        super.replaceContentLayout(R.layout.activity_main, super.C);
-
-//        Toolbar toolbar = findViewById(R.id.toolbar);
-//        setSupportActionBar(toolbar);
-//
-//        ActionBar actionbar = getSupportActionBar();
-//        actionbar.setDisplayHomeAsUpEnabled(true);
-//        actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
-//
-//        drawerLayout = findViewById(R.id.drawer_layout);
 
         // Record to the external cache directory for visibility
 //        fileName = getExternalCacheDir().getAbsolutePath();
@@ -102,18 +92,6 @@ public class MainActivity extends BaseActivity {
         });
 
     }
-
-
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-//        switch (item.getItemId()) {
-//            case android.R.id.home:
-//                drawerLayout.openDrawer(GravityCompat.START);
-//                return true;
-//        }
-//        return super.onOptionsItemSelected(item);
-//    }
-
 
     private long lastPause;
 
@@ -219,6 +197,8 @@ private long pauseOffset = 0;
             player.setDataSource(fileName);
             player.prepare();
             player.start();
+            System.out.print("duration: ");
+            System.out.println(player.getDuration());
         } catch (IOException e) {
             Log.e(LOG_TAG, "prepare() failed");
         }
