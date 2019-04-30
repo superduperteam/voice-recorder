@@ -7,6 +7,7 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -26,14 +27,17 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.superduperteam.voicerecorder.voicerecorder.BaseActivity;
 import com.superduperteam.voicerecorder.voicerecorder.R;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
 public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenuItemClickListener, MyRecyclerViewAdapter.ItemClickListener {
     private RecyclerView recyclerView;
     private List selectedItems;
-    MyRecyclerViewAdapter adapter;
+    private MyRecyclerViewAdapter adapter;
+    private File recordingsFolder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,19 +50,15 @@ public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenu
         View contentView = inflater.inflate(R.layout.activity_recordings, null, false);
         mDrawer.addView(contentView, 1);
 
-
-        // Saar: I assume you would want to change this list to a list of Files taken from our directory.
-        ArrayList<String> animalNames = new ArrayList<>();
-        animalNames.add("Horse");
-        animalNames.add("Cow");
-        animalNames.add("Camel");
-        animalNames.add("Sheep");
-        animalNames.add("Goat");
+        String folderPath = Objects.requireNonNull(getExternalFilesDir(null)).getAbsolutePath();
+        recordingsFolder = new File(folderPath);
+        File [] recordings = recordingsFolder.listFiles();
+        List recordingsList = new ArrayList(Arrays.asList(recordings));
 
         // set up the RecyclerView
         RecyclerView recyclerView = findViewById(R.id.recordingsLRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new MyRecyclerViewAdapter(this, animalNames);
+        adapter = new MyRecyclerViewAdapter(this, recordingsList);
         adapter.setClickListener(this);
         recyclerView.setAdapter(adapter);
 

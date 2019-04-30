@@ -1,6 +1,9 @@
 package com.superduperteam.voicerecorder.voicerecorder.activities;
 
 import android.content.Context;
+import android.media.MediaMetadataRetriever;
+import android.media.MediaPlayer;
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,7 +13,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.superduperteam.voicerecorder.voicerecorder.R;
 
+import java.io.File;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 
 // Saar: took this from:
@@ -18,14 +23,16 @@ import java.util.List;
 
 public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder> {
 
-    private List<String> mData;
+    private List<File> mRecordings;
     private LayoutInflater mInflater;
     private ItemClickListener mClickListener;
+    private MediaMetadataRetriever mmr;
 
     // data is passed into the constructor
-    MyRecyclerViewAdapter(Context context, List<String> data) {
+    MyRecyclerViewAdapter(Context context, List<File> recordings) {
         this.mInflater = LayoutInflater.from(context);
-        this.mData = data;
+        this.mRecordings = recordings;
+        mmr = new MediaMetadataRetriever(); //used to get duration of recording. much lighter than MediaPlayer
     }
 
     // inflates the row layout from xml when needed
@@ -38,24 +45,55 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     // binds the data to the TextView in each row
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        String animal = mData.get(position);
-        holder.myTextView.setText(animal);
+        String recordingName = mRecordings.get(position).getName();
+        String recordingDuration;
+        long recordingDurationMilliseconds;
+
+        mmr.setDataSource(mRecordings.get(position).getPath());
+        recordingDuration = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+        recordingDurationMilliseconds = Long.parseLong(recordingDuration);
+        recordingDuration = convertMilliSecondsToRecordingTime(recordingDurationMilliseconds);
+
+        holder.recordingDurationTextView.setText(recordingDuration);
+        holder.recordingNameTextView.setText(recordingName);
     }
 
+    private String convertMilliSecondsToRecordingTime(long milliseconds) {
+        String minutes = Long.toString(TimeUnit.MILLISECONDS.toMinutes(milliseconds));
+        String seconds = Long.toString(TimeUnit.MILLISECONDS.toSeconds(milliseconds) -
+                TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(milliseconds)));
+
+        if(TimeUnit.MILLISECONDS.toMinutes(milliseconds) < 10) {
+            minutes = "0" + minutes;
+        }
+
+        if(TimeUnit.MILLISECONDS.toSeconds(milliseconds) -
+                TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(milliseconds)) < 10) {
+            seconds = "0" + seconds;
+        }
+        System.out.print("Minutes and seconds: ");
+        System.out.println(minutes);
+        System.out.println(seconds);
+        return String.format("%s:%s",
+               minutes, seconds
+        );
+    }
     // total number of rows
     @Override
     public int getItemCount() {
-        return mData.size();
+        return mRecordings.size();
     }
 
 
     // stores and recycles views as they are scrolled off screen
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        TextView myTextView;
+        TextView recordingNameTextView;
+        TextView recordingDurationTextView;
 
         ViewHolder(View itemView) {
             super(itemView);
-            myTextView = itemView.findViewById(R.id.recordingTitle);
+            recordingNameTextView = itemView.findViewById(R.id.recordingTitle);
+            recordingDurationTextView = itemView.findViewById(R.id.recordingDuration);
             itemView.setOnClickListener(this);
         }
 
@@ -66,8 +104,8 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     }
 
     // convenience method for getting data at click position
-    String getItem(int id) {
-        return mData.get(id);
+    File getItem(int id) {
+        return mRecordings.get(id);
     }
 
     // allows clicks events to be caught
