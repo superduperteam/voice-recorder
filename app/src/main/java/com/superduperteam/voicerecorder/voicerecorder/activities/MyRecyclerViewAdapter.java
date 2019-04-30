@@ -48,14 +48,40 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
         String recordingName = mRecordings.get(position).getName();
         String recordingDuration;
         long recordingDurationMilliseconds;
+        String recordingDate;
 
         mmr.setDataSource(mRecordings.get(position).getPath());
         recordingDuration = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
         recordingDurationMilliseconds = Long.parseLong(recordingDuration);
         recordingDuration = convertMilliSecondsToRecordingTime(recordingDurationMilliseconds);
+        recordingDate = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DATE);
+        recordingDate = extractDateFromMetaDataDate(recordingDate);
 
+        holder.recordingDate.setText(recordingDate);
         holder.recordingDurationTextView.setText(recordingDuration);
         holder.recordingNameTextView.setText(recordingName);
+    }
+
+    private final static int YEAR_START_INDEX = 0;
+    private final static int YEAR_END_INDEX = 4;
+    private final static int MONTH_START_INDEX = 4;
+    private final static int MONTH_END_INDEX = 6;
+    private final static int DAY_START_INDEX = 6;
+    private final static int DAY_END_INDEX = 8;
+    //meta data date structure: 20190430T192392329
+    //we want what is before T (what comes after T is timestamp)
+    private String extractDateFromMetaDataDate(String metaDataDate) {
+        String unFormattedDate = metaDataDate.split("T")[0];
+        String day = unFormattedDate.substring(DAY_START_INDEX, DAY_END_INDEX);
+        String month = unFormattedDate.substring(MONTH_START_INDEX, MONTH_END_INDEX);
+        String year = unFormattedDate.substring(YEAR_START_INDEX, YEAR_END_INDEX);
+
+        String date = new StringBuilder()
+                .append(day).append("/")
+                .append(month).append("/")
+                .append(year).toString();
+
+        return date;
     }
 
     private String convertMilliSecondsToRecordingTime(long milliseconds) {
@@ -89,11 +115,14 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView recordingNameTextView;
         TextView recordingDurationTextView;
+        TextView recordingDate;
 
         ViewHolder(View itemView) {
             super(itemView);
             recordingNameTextView = itemView.findViewById(R.id.recordingTitle);
             recordingDurationTextView = itemView.findViewById(R.id.recordingDuration);
+            recordingDate = itemView.findViewById(R.id.recordingDate);
+
             itemView.setOnClickListener(this);
         }
 
