@@ -1,29 +1,25 @@
 package com.superduperteam.voicerecorder.voicerecorder.activities;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.CheckBox;
+import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
 
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -34,9 +30,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenuItemClickListener {
+public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenuItemClickListener, MyRecyclerViewAdapter.ItemClickListener {
     private RecyclerView recyclerView;
     private List selectedItems;
+    MyRecyclerViewAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,8 +46,22 @@ public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenu
         View contentView = inflater.inflate(R.layout.activity_recordings, null, false);
         mDrawer.addView(contentView, 1);
 
+        ArrayList<String> animalNames = new ArrayList<>();
+        animalNames.add("Horse");
+        animalNames.add("Cow");
+        animalNames.add("Camel");
+        animalNames.add("Sheep");
+        animalNames.add("Goat");
 
+        // set up the RecyclerView
+        RecyclerView recyclerView = findViewById(R.id.recordingsLRecyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new MyRecyclerViewAdapter(this, animalNames);
+        adapter.setClickListener(this);
+        recyclerView.setAdapter(adapter);
 
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(), LinearLayout.VERTICAL);
+        recyclerView.addItemDecoration(dividerItemDecoration);
 
 //        recyclerView = (RecyclerView) findViewById(R.id.recordingsLRecyclerView);
 
@@ -151,6 +162,13 @@ public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenu
 
                 }).show();
     }
+
+    @Override
+    public void onItemClick(View view, int position) {
+        Toast.makeText(this, "You clicked " + adapter.getItem(position) + " on row number " + position, Toast.LENGTH_SHORT).show();
+    }
+
+
 //    public void alertSingleChoiceItems(){
 //
 //        AlertDialog.Builder builder = new AlertDialog.Builder(RecordingsActivity.this);

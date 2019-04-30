@@ -1,33 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+<RelativeLayout xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
     <!--tools:context=".activities.RecordingsActivity"-->
     <!--android:orientation="vertical">-->
 
     <!--tools:context=".activities.RecordingsActivity"-->
     <!--android:orientation="vertical"-->
 
-    <!--<androidx.appcompat.widget.Toolbar-->
-        <!--android:id="@+id/toolbar"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="?attr/actionBarSize"-->
-        <!--android:background="?attr/colorPrimary"-->
-        <!--android:theme="@style/ThemeOverlay.AppCompat.ActionBar" />-->
-
-    <RelativeLayout
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/invisibleToolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        tools:context=".activities.RecordingsActivity">
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:visibility="invisible"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar" />
+
+
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recordingsLRecyclerView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-    </RelativeLayout>
+            android:layout_height="match_parent"
+            android:layout_below="@id/invisibleToolbar"/>
 
-</LinearLayout>
+
+</RelativeLayout>
 

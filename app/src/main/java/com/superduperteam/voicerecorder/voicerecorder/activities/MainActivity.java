@@ -57,7 +57,7 @@ public class MainActivity extends BaseActivity {
 
    // boolean mStartRecording = true;
 
-
+    //Todo: need to to make sure it checks all the checks (permissions and etc').
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
