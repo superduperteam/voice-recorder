@@ -113,7 +113,7 @@ public class MainActivity extends BaseActivity {
         return filePath +" "+ fileNameNumber + outputFormat;
     }
 
-    public boolean fileExists(String filePath) {
+    private boolean fileExists(String filePath) {
       //  File file = context.getFileStreamPath(filename);
         File file = new File(filePath);
         //Todo: problem: Race condition ?

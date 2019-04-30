@@ -32,6 +32,7 @@ import com.superduperteam.voicerecorder.voicerecorder.R;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenuItemClickListener {
     private RecyclerView recyclerView;
@@ -69,7 +70,7 @@ public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenu
         MenuItem mMenuItem = menu.findItem(R.id.app_bar_search);
 
         ActionBar actionbar = getSupportActionBar();
-        actionbar.setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(actionbar).setDisplayHomeAsUpEnabled(true);
         actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
 //        mMenuItem.setVisible(false);
 //        mMenuItem.setTitle("Deleteeeee");
@@ -118,8 +119,8 @@ public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenu
                 null, false);
 
 
-        final RadioGroup genderRadioGroup = (RadioGroup) formElementsView
-                .findViewById(R.id.genderRadioGroup);
+        final RadioGroup sortOrderRadioGroup = formElementsView.findViewById(R.id.sortOrderRadioGroup);
+        final RadioGroup sortByAttributeGroup = formElementsView.findViewById(R.id.sortByRadioGroup);
 
         // the alert dialog
         new AlertDialog.Builder(RecordingsActivity.this).setView(formElementsView)
@@ -135,17 +136,15 @@ public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenu
                          * Getting the value of selected RadioButton.
                          */
                         // get selected radio button from radioGroup
-                        int selectedId = genderRadioGroup
-                                .getCheckedRadioButtonId();
+                        int selectedAttributeId = sortByAttributeGroup.getCheckedRadioButtonId();
+                        int SelectedOrderId = sortOrderRadioGroup.getCheckedRadioButtonId();
 
                         // find the radiobutton by returned id
-                        RadioButton selectedRadioButton = (RadioButton) formElementsView
-                                .findViewById(selectedId);
-
-                        toastString += "Selected radio button is: "
-                                + selectedRadioButton.getText() + "!\n";
-
-                        Toast.makeText(getApplicationContext(), toastString, Toast.LENGTH_SHORT).show();
+                        RadioButton selectedAttributeRadioButton = formElementsView.findViewById(selectedAttributeId);
+                        RadioButton selectedOrderRadioButton = formElementsView.findViewById(SelectedOrderId);
+                        toastString += "Selected radio buttons are: " + selectedAttributeRadioButton.getText() + " & "
+                                +selectedOrderRadioButton.getText()  +"!\n";
+                        Toast.makeText(getApplicationContext(), toastString, Toast.LENGTH_LONG).show();
 
                         dialog.cancel();
                     }
