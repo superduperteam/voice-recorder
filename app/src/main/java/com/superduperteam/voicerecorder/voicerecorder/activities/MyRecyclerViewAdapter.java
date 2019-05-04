@@ -1,12 +1,16 @@
 package com.superduperteam.voicerecorder.voicerecorder.activities;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -14,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.superduperteam.voicerecorder.voicerecorder.R;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -23,10 +28,15 @@ import java.util.concurrent.TimeUnit;
 
 public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder> {
 
+    private static final String LOG_TAG = "AudioRecordTest";
     private List<File> mRecordings;
     private LayoutInflater mInflater;
     private ItemClickListener mClickListener;
     private MediaMetadataRetriever mmr;
+    private MediaPlayer player = new MediaPlayer();
+    private int recordingToResumePosition = -1; //-1 means not recording was paused and should be resumed
+    private boolean shouldSetDataSource = true;
+    private ImageButton lastPlayed;
 
     // data is passed into the constructor
     MyRecyclerViewAdapter(Context context, List<File> recordings) {
@@ -116,13 +126,61 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
         TextView recordingNameTextView;
         TextView recordingDurationTextView;
         TextView recordingDate;
+        ImageButton playButton;
 
         ViewHolder(View itemView) {
             super(itemView);
             recordingNameTextView = itemView.findViewById(R.id.recordingTitle);
             recordingDurationTextView = itemView.findViewById(R.id.recordingDuration);
             recordingDate = itemView.findViewById(R.id.recordingDate);
+            playButton = itemView.findViewById(R.id.recordingsPlayImagePlace);
+            player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mediaPlayer) {
+                    mediaPlayer.reset();
+                    recordingToResumePosition = -1;
+                    shouldSetDataSource = true;
+                }
+            });
 
+            playButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    int position = getAdapterPosition();
+                    File fileToPlay = getItem(position);
+
+                    if(player.isPlaying() && recordingToResumePosition != position) {
+                        player.reset();
+                        recordingToResumePosition = -1;
+                        shouldSetDataSource = true;
+                        playButton.setBackgroundResource(R.drawable.ic_play_arrow_triangle_alt1);
+                        lastPlayed.setBackgroundResource(R.drawable.ic_play_arrow_triangle_alt1);
+                    }
+                    else if(player.isPlaying() && recordingToResumePosition == position) {
+                        player.pause();
+                        System.out.println("paused");
+                        shouldSetDataSource = false;
+                        playButton.setBackgroundResource(R.drawable.ic_play_arrow_triangle_alt1);
+                    }
+                    else {
+                        try {
+                            System.out.println("going to start..");
+                            recordingToResumePosition = position;
+                            if(shouldSetDataSource) {
+                                player.setDataSource(fileToPlay.getAbsolutePath());
+                                player.prepare();
+                            }
+                            player.start();
+                            lastPlayed = playButton;
+                            playButton.setBackgroundResource(R.drawable.ic_pause_circle_outline_black_24dp);
+                            System.out.print("duration: ");
+                            System.out.println(player.getDuration());
+                        } catch (IOException e) {
+                            Log.e(LOG_TAG, "prepare() failed");
+                        }
+                    }
+                }
+            });
             itemView.setOnClickListener(this);
         }
 

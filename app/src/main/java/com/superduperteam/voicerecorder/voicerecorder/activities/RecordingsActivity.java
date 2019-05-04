@@ -170,6 +170,9 @@ public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenu
         Toast.makeText(this, "You clicked " + adapter.getItem(position) + " on row number " + position, Toast.LENGTH_SHORT).show();
     }
 
+    public void onPlayClick(View view, int position) {
+    }
+
 
 //    public void alertSingleChoiceItems(){
 //
