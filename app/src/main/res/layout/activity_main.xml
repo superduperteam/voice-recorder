@@ -69,7 +69,8 @@
             android:layout_centerVertical="true"
             android:layout_marginLeft="60dp"
             android:layout_toRightOf="@id/record_button"
-            android:background="@drawable/ic_bookmark" />
+            android:background="@drawable/ic_bookmark"
+            android:onClick="onBookmarkClick"/>
     </RelativeLayout>
 
 </LinearLayout>

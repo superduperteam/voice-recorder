@@ -2,6 +2,7 @@ package com.superduperteam.voicerecorder.voicerecorder.activities;
 
 import android.Manifest;
 import android.content.Context;
+import android.media.MediaMetadata;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Bundle;
@@ -9,17 +10,11 @@ import android.os.Environment;
 import android.os.SystemClock;
 
 import androidx.core.app.ActivityCompat;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Chronometer;
-import android.widget.ImageButton;
 
 import com.superduperteam.voicerecorder.voicerecorder.BaseActivity;
 import com.superduperteam.voicerecorder.voicerecorder.R;
@@ -27,12 +22,10 @@ import com.superduperteam.voicerecorder.voicerecorder.R;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+
+import static android.media.MediaMetadata.METADATA_KEY_DISPLAY_DESCRIPTION;
 
 public class MainActivity extends BaseActivity {
 
@@ -41,8 +34,9 @@ public class MainActivity extends BaseActivity {
     //private boolean isStart;
     private boolean isRecording = false; // is actively recording something?
     private String lastRecordingPath = null;
-    private String outputFormat = ".3gp";
+    private String outputFormat = ".m4a"; // TODO: 7/18/2019  might wantto change to ".m4a"
     private int recordingNum = 0;
+    private List<Bookmark> bookmarksList;
 
     //voice recorder
     private static final String LOG_TAG = "AudioRecordTest";
@@ -149,7 +143,7 @@ public class MainActivity extends BaseActivity {
         isRecording = !isRecording;
     }
 
-    public void onStopClick(View view) {
+    public void onStopClick(View view) throws IOException {
         if(isRunning){
             resetStopWatch();
             findViewById(R.id.record_button).setBackgroundResource(R.drawable.ic_record_button);
@@ -201,12 +195,13 @@ private long pauseOffset = 0;
         pauseOffset = 0;
     }
 
-    private void stopRecording() {
+    private void stopRecording() throws IOException {
         recorder.stop();
         recorder.release();
         recorder = null;
         recordingNum++;
 
+        addBookmarksToMetadata();
         startPlaying();
     }
 
@@ -214,7 +209,7 @@ private long pauseOffset = 0;
         recorder.pause();
     }
 
-    private void startPlaying() {
+    private void startPlaying() throws IOException {
         MediaPlayer player = new MediaPlayer();
         try {
             player.setDataSource(lastRecordingPath);
@@ -225,16 +220,21 @@ private long pauseOffset = 0;
         } catch (IOException e) {
             Log.e(LOG_TAG, "prepare() failed");
         }
+
+        MetaDataRead cmd = new MetaDataRead();
+        String text = cmd.read(lastRecordingPath);
+        System.out.println(text +"!@#");
     }
 
     private void recorderInit() {
+        bookmarksList = new ArrayList<>();
         recorder = new MediaRecorder();
         recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+        recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
         String outputPath = getCurrentFilePath();
         recorder.setOutputFile(outputPath);
         lastRecordingPath = outputPath;
-        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
 
         try {
             recorder.prepare();
@@ -262,5 +262,21 @@ private long pauseOffset = 0;
         }
         Log.e(LOG_TAG, "external storage is NOT available for read and write");
         return false;
+    }
+
+    public void onBookmarkClick(View view) {
+        if(isRunning){
+            long elapsedTime = SystemClock.elapsedRealtime() - chronometer.getBase();
+            bookmarksList.add(new Bookmark(elapsedTime,"test"));
+        }
+    }
+
+    private void addBookmarksToMetadata() throws IOException {
+        MediaMetadata.Builder metadataBuilder = new MediaMetadata.Builder();
+
+        metadataBuilder.putString(METADATA_KEY_DISPLAY_DESCRIPTION, "test");
+        metadataBuilder.build();
+        MetaDataInsert cmd = new MetaDataInsert();
+        cmd.writeRandomMetadata(lastRecordingPath, bookmarksList.toString());
     }
 }

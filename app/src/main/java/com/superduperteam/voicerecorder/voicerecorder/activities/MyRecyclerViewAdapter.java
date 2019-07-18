@@ -134,20 +134,33 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
             recordingDurationTextView = itemView.findViewById(R.id.recordingDuration);
             recordingDate = itemView.findViewById(R.id.recordingDate);
             playButton = itemView.findViewById(R.id.recordingsPlayImagePlace);
-            player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                @Override
-                public void onCompletion(MediaPlayer mediaPlayer) {
-                    mediaPlayer.reset();
-                    recordingToResumePosition = -1;
-                    shouldSetDataSource = true;
-                }
-            });
+
+            // Saar: moved this into: playButton.setOnClickListener(..} below, to make pause symbol return to play on finish.
+//            player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+//                @Override
+//                public void onCompletion(MediaPlayer mediaPlayer) {
+//                    mediaPlayer.reset();
+//                    recordingToResumePosition = -1;
+//                    shouldSetDataSource = true;
+//                    playButton.setBackgroundResource(R.drawable.ic_play_arrow_triangle_alt1);
+//                }
+//            });
 
             playButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     int position = getAdapterPosition();
                     File fileToPlay = getItem(position);
+
+                    player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                        @Override
+                        public void onCompletion(MediaPlayer mediaPlayer) {
+                            mediaPlayer.reset();
+                            recordingToResumePosition = -1;
+                            shouldSetDataSource = true;
+                            playButton.setBackgroundResource(R.drawable.ic_play_arrow_triangle_alt1);
+                        }
+                    });
 
                     if(player.isPlaying() && recordingToResumePosition != position) {
                         player.reset();
