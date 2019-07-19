@@ -272,10 +272,6 @@ private long pauseOffset = 0;
     }
 
     private void addBookmarksToMetadata() throws IOException {
-        MediaMetadata.Builder metadataBuilder = new MediaMetadata.Builder();
-
-        metadataBuilder.putString(METADATA_KEY_DISPLAY_DESCRIPTION, "test");
-        metadataBuilder.build();
         MetaDataInsert cmd = new MetaDataInsert();
         cmd.writeRandomMetadata(lastRecordingPath, bookmarksList.toString());
     }
