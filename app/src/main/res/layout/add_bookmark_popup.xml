@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="#62def8"
+    android:orientation="vertical">
+
+    <EditText
+        android:id="@+id/add_bookmark_edit_text"
+        android:layout_width="277dp"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Bookmark name"
+        android:inputType="textPersonName"
+        android:padding="16dp"
+        android:layout_margin="8dp"/>
+
+    <Button
+        android:id="@+id/add_bookmark_button"
+        android:layout_width="109dp"
+        android:layout_height="wrap_content"
+        android:text="Ok"
+        android:onClick="onAddBookmarkClick"
+        android:layout_gravity="center"
+        android:padding="16dp"/>
+
+</LinearLayout>

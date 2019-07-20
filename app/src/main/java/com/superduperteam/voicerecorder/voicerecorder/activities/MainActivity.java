@@ -2,7 +2,6 @@ package com.superduperteam.voicerecorder.voicerecorder.activities;
 
 import android.Manifest;
 import android.content.Context;
-import android.media.MediaMetadata;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Bundle;
@@ -12,9 +11,15 @@ import android.os.SystemClock;
 import androidx.core.app.ActivityCompat;
 
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Chronometer;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 
 import com.superduperteam.voicerecorder.voicerecorder.BaseActivity;
 import com.superduperteam.voicerecorder.voicerecorder.R;
@@ -24,8 +29,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-import static android.media.MediaMetadata.METADATA_KEY_DISPLAY_DESCRIPTION;
 
 public class MainActivity extends BaseActivity {
 
@@ -37,7 +40,10 @@ public class MainActivity extends BaseActivity {
     private String outputFormat = ".m4a"; // TODO: 7/18/2019  might wantto change to ".m4a"
     private int recordingNum = 0;
     private List<Bookmark> bookmarksList;
-
+    private ImageButton bookmarkImageButton;
+    private EditText bookmarkNameEditText;
+    private View addBookmarkView;
+    private PopupWindow addBookmarkPopupWindow;
     //voice recorder
     private static final String LOG_TAG = "AudioRecordTest";
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
@@ -66,6 +72,16 @@ public class MainActivity extends BaseActivity {
         // Record to the external cache directory for visibility
 //        fileName = getExternalCacheDir().getAbsolutePath();
 //        fileName += "/audiorecordtest.3gp";
+        bookmarkNameEditText = findViewById(R.id.add_bookmark_edit_text);
+        bookmarkImageButton = findViewById(R.id.bookmark_image_button);
+        bookmarkImageButton.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                onButtonShowPopupWindowClick(getWindow().getDecorView());
+
+                return true;
+            }
+        });
 
         isExternalStorageWritable();
         ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
@@ -254,6 +270,35 @@ private long pauseOffset = 0;
         }
     }
 
+    public void onButtonShowPopupWindowClick(View view) {
+
+        // inflate the layout of the popup window
+        LayoutInflater inflater = (LayoutInflater)
+                getSystemService(LAYOUT_INFLATER_SERVICE);
+        addBookmarkView = inflater.inflate(R.layout.add_bookmark_popup, null);
+
+        // create the popup window
+        int width = LinearLayout.LayoutParams.WRAP_CONTENT;
+        int height = LinearLayout.LayoutParams.WRAP_CONTENT;
+        boolean focusable = true; // lets taps outside the popup also dismiss it
+        addBookmarkPopupWindow = new PopupWindow(addBookmarkView, width, height, focusable);
+
+        // show the popup window
+        // which view you pass in doesn't matter, it is only used for the window tolken
+        addBookmarkPopupWindow.showAtLocation(view, Gravity.CENTER, 0, 0);
+
+        // dismiss the popup window when touched
+        addBookmarkView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                addBookmarkPopupWindow.dismiss();
+                return true;
+            }
+        });
+
+        bookmarkNameEditText = view.findViewById(R.id.add_bookmark_edit_text);
+    }
+
     /* Checks if external storage is available for read and write */
     private boolean isExternalStorageWritable() {
         String state = Environment.getExternalStorageState();
@@ -274,5 +319,15 @@ private long pauseOffset = 0;
     private void addBookmarksToMetadata() throws IOException {
         MetaDataInsert cmd = new MetaDataInsert();
         cmd.writeRandomMetadata(lastRecordingPath, bookmarksList.toString());
+    }
+
+    public void onAddBookmarkClick(View view) {
+        bookmarkNameEditText = addBookmarkView.findViewById(R.id.add_bookmark_edit_text);
+        String bookmarkName = bookmarkNameEditText.getText().toString();
+
+        long elapsedTime = SystemClock.elapsedRealtime() - chronometer.getBase();
+        bookmarksList.add(new Bookmark(elapsedTime, bookmarkName));
+
+        addBookmarkPopupWindow.dismiss();
     }
 }

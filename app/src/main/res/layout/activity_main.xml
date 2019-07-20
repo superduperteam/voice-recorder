@@ -64,13 +64,15 @@
             android:onClick="onStopClick"/>
 
         <ImageButton
+            android:id="@+id/bookmark_image_button"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_centerVertical="true"
             android:layout_marginLeft="60dp"
             android:layout_toRightOf="@id/record_button"
             android:background="@drawable/ic_bookmark"
-            android:onClick="onBookmarkClick"/>
+            android:onClick="onBookmarkClick"
+            />
     </RelativeLayout>
 
 </LinearLayout>

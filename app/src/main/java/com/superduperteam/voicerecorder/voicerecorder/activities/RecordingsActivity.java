@@ -1,25 +1,26 @@
 package com.superduperteam.voicerecorder.voicerecorder.activities;
 
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AlertDialog;
-
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.media.MediaMetadataRetriever;
 import android.os.Bundle;
-import android.os.Environment;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
-
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -38,140 +39,174 @@ public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenu
     private List selectedItems;
     private MyRecyclerViewAdapter adapter;
     private File recordingsFolder;
+    private MediaMetadataRetriever mediaMetadataRetriever;
+    private EditText searchBookmarkEditText;
+    private List<File> recordings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-    //    setContentView(R.layout.activity_recordings);
+        //    setContentView(R.layout.activity_recordings);
 //        setContentView(R.layout.activity_recording_player);
         LayoutInflater inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
+        mediaMetadataRetriever = new MediaMetadataRetriever();
         //inflate your activity layout here!
         View contentView = inflater.inflate(R.layout.activity_recordings, null, false);
         mDrawer.addView(contentView, 1);
 
         String folderPath = Objects.requireNonNull(getExternalFilesDir(null)).getAbsolutePath();
         recordingsFolder = new File(folderPath);
-        File [] recordings = recordingsFolder.listFiles();
-        List recordingsList = new ArrayList(Arrays.asList(recordings));
+        recordings = new ArrayList<>(Arrays.asList(recordingsFolder.listFiles()));
+
 
         // set up the RecyclerView
         RecyclerView recyclerView = findViewById(R.id.recordingsLRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new MyRecyclerViewAdapter(this, recordingsList);
+        adapter = new MyRecyclerViewAdapter(this, recordings);
         adapter.setClickListener(this);
         recyclerView.setAdapter(adapter);
 
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(), LinearLayout.VERTICAL);
         recyclerView.addItemDecoration(dividerItemDecoration);
+        searchBookmarkEditText = findViewById(R.id.search_by_bookmark);
+        searchBookmarkEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
-//        recyclerView = (RecyclerView) findViewById(R.id.recordingsLRecyclerView);
+            }
 
+            @Override
+            public void onTextChanged(CharSequence charSequence, int start, int count, int after) {
+                final String textToSearch = charSequence.toString();
+
+                recordings = new ArrayList<>(Arrays.asList(recordingsFolder.listFiles()));
+                recordings.removeIf(recording -> {
+                    boolean remove = false;
+                    mediaMetadataRetriever.setDataSource(recording.getPath());
+                    String title = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+                    if (title == null) {
+                        remove = true;
+                    } else {
+                        remove = !(title.contains(textToSearch));
+                    }
+
+                    if (textToSearch.equals("")) {
+                        remove = false;
+                    }
+
+                    return remove;
+                });
+
+                adapter = new MyRecyclerViewAdapter(getApplicationContext(), recordings);
+
+                recyclerView.swapAdapter(adapter, true);
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+            }
+        });
     }
 
-//    @Override
-//    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-//        getMenuInflater().inflate(R.layout.recordingsMoreOptions);
-//    }
 
+        // Saar: This is to make the buttons in the top to show : search and sort
+        @Override
+        public boolean onCreateOptionsMenu (Menu menu){
+            MenuInflater inflater = getMenuInflater();
+            inflater.inflate(R.menu.menu_recordings, menu);
+            MenuItem mMenuItem = menu.findItem(R.id.app_bar_search);
 
-    // Saar: This is to make the buttons in the top to show : search and sort
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_recordings, menu);
-        MenuItem mMenuItem = menu.findItem(R.id.app_bar_search);
-
-        ActionBar actionbar = getSupportActionBar();
-        Objects.requireNonNull(actionbar).setDisplayHomeAsUpEnabled(true);
-        actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
+            ActionBar actionbar = getSupportActionBar();
+            Objects.requireNonNull(actionbar).setDisplayHomeAsUpEnabled(true);
+            actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
 //        mMenuItem.setVisible(false);
 //        mMenuItem.setTitle("Deleteeeee");
 //        mMenuItem.setEnabled(false);
-        return super.onCreateOptionsMenu(menu);
-    }
+            return super.onCreateOptionsMenu(menu);
+        }
 
 
-    // Saar: This is for the actual list of recordings - if user click on the vertical 3 dots.
-    public void onRecordingClick(View view) {
-        PopupMenu popup = new PopupMenu(this, view); // view=button
-        popup.setOnMenuItemClickListener(this);
-        popup.inflate(R.menu.recording_clicked_menu);
-        popup.show();
-    }
-    @Override
-    public boolean onMenuItemClick(MenuItem item) {
-        switch (item.getItemId()){
-            case R.id.recording_clicked_delete:
-                Toast.makeText(this, "delete from recording row", Toast.LENGTH_LONG).show();
-                return true;
-            case R.id.recording_clicked_edit:
-                Toast.makeText(this, "edit from recording row", Toast.LENGTH_LONG).show();
-                return true;
-            case R.id.recording_clicked_share:
-                Toast.makeText(this, "share from recording row", Toast.LENGTH_LONG).show();
-                return true;
+        // Saar: This is for the actual list of recordings - if user click on the vertical 3 dots.
+        public void onRecordingClick (View view){
+            PopupMenu popup = new PopupMenu(this, view); // view=button
+            popup.setOnMenuItemClickListener(this);
+            popup.inflate(R.menu.recording_clicked_menu);
+            popup.show();
+        }
+        @Override
+        public boolean onMenuItemClick (MenuItem item){
+            switch (item.getItemId()) {
+                case R.id.recording_clicked_delete:
+                    Toast.makeText(this, "delete from recording row", Toast.LENGTH_LONG).show();
+                    return true;
+                case R.id.recording_clicked_edit:
+                    Toast.makeText(this, "edit from recording row", Toast.LENGTH_LONG).show();
+                    return true;
+                case R.id.recording_clicked_share:
+                    Toast.makeText(this, "share from recording row", Toast.LENGTH_LONG).show();
+                    return true;
                 default:
                     return false;
+            }
         }
-    }
+
+        // Saar: This is for Sort button
+        public void onSortClick (MenuItem item){
+            alertSortElements();
+        }
+        public void alertSortElements () {
+
+            /*
+             * Inflate the XML view. activity_main is in
+             * res/layout/form_elements.xml
+             */
+            LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            final View formElementsView = inflater.inflate(R.layout.sort_elements,
+                    null, false);
 
 
-    // Saar: This is for Sort button
-    public void onSortClick(MenuItem item) {
-        alertSortElements();
-    }
-    public void alertSortElements() {
+            final RadioGroup sortOrderRadioGroup = formElementsView.findViewById(R.id.sortOrderRadioGroup);
+            final RadioGroup sortByAttributeGroup = formElementsView.findViewById(R.id.sortByRadioGroup);
 
-        /*
-         * Inflate the XML view. activity_main is in
-         * res/layout/form_elements.xml
-         */
-        LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        final View formElementsView = inflater.inflate(R.layout.sort_elements,
-                null, false);
+            // the alert dialog
+            new AlertDialog.Builder(RecordingsActivity.this).setView(formElementsView)
+                    .setTitle("Sort")
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @TargetApi(11)
+                        public void onClick(DialogInterface dialog, int id) {
+
+                            String toastString = "";
 
 
-        final RadioGroup sortOrderRadioGroup = formElementsView.findViewById(R.id.sortOrderRadioGroup);
-        final RadioGroup sortByAttributeGroup = formElementsView.findViewById(R.id.sortByRadioGroup);
+                            /*
+                             * Getting the value of selected RadioButton.
+                             */
+                            // get selected radio button from radioGroup
+                            int selectedAttributeId = sortByAttributeGroup.getCheckedRadioButtonId();
+                            int SelectedOrderId = sortOrderRadioGroup.getCheckedRadioButtonId();
 
-        // the alert dialog
-        new AlertDialog.Builder(RecordingsActivity.this).setView(formElementsView)
-                .setTitle("Sort")
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @TargetApi(11)
-                    public void onClick(DialogInterface dialog, int id) {
+                            // find the radiobutton by returned id
+                            RadioButton selectedAttributeRadioButton = formElementsView.findViewById(selectedAttributeId);
+                            RadioButton selectedOrderRadioButton = formElementsView.findViewById(SelectedOrderId);
+                            toastString += "Selected radio buttons are: " + selectedAttributeRadioButton.getText() + " & "
+                                    + selectedOrderRadioButton.getText() + "!\n";
+                            Toast.makeText(getApplicationContext(), toastString, Toast.LENGTH_LONG).show();
 
-                        String toastString = "";
+                            dialog.cancel();
+                        }
 
+                    }).show();
+        }
 
-                        /*
-                         * Getting the value of selected RadioButton.
-                         */
-                        // get selected radio button from radioGroup
-                        int selectedAttributeId = sortByAttributeGroup.getCheckedRadioButtonId();
-                        int SelectedOrderId = sortOrderRadioGroup.getCheckedRadioButtonId();
+        @Override
+        public void onItemClick (View view,int position){
+            Toast.makeText(this, "You clicked " + adapter.getItem(position) + " on row number " + position, Toast.LENGTH_SHORT).show();
+        }
 
-                        // find the radiobutton by returned id
-                        RadioButton selectedAttributeRadioButton = formElementsView.findViewById(selectedAttributeId);
-                        RadioButton selectedOrderRadioButton = formElementsView.findViewById(SelectedOrderId);
-                        toastString += "Selected radio buttons are: " + selectedAttributeRadioButton.getText() + " & "
-                                +selectedOrderRadioButton.getText()  +"!\n";
-                        Toast.makeText(getApplicationContext(), toastString, Toast.LENGTH_LONG).show();
-
-                        dialog.cancel();
-                    }
-
-                }).show();
-    }
-
-    @Override
-    public void onItemClick(View view, int position) {
-        Toast.makeText(this, "You clicked " + adapter.getItem(position) + " on row number " + position, Toast.LENGTH_SHORT).show();
-    }
-
-    public void onPlayClick(View view, int position) {
-    }
+        public void onPlayClick (View view,int position){
+        }
 
 
 //    public void alertSingleChoiceItems(){
@@ -227,8 +262,6 @@ public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenu
 //    }
 
 
-
-
 //    public void onShareClick(MenuItem item) {
 //        Toast.makeText(getApplicationContext(),"share", Toast.LENGTH_SHORT).show();
 //    }
@@ -240,4 +273,4 @@ public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenu
 //    public void onEditClick(MenuItem item) {
 //        Toast.makeText(getApplicationContext(),"edit", Toast.LENGTH_SHORT).show();
 //    }
-}
+    }
