@@ -19,6 +19,7 @@ import com.superduperteam.voicerecorder.voicerecorder.R;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -29,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder> {
 
     private static final String LOG_TAG = "AudioRecordTest";
-    private List<File> mRecordings;
+    private List<Line> mRecordings;
     private LayoutInflater mInflater;
     private ItemClickListener mClickListener;
     private MediaMetadataRetriever mmr;
@@ -39,7 +40,7 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     private ImageButton lastPlayed;
 
     // data is passed into the constructor
-    MyRecyclerViewAdapter(Context context, List<File> recordings) {
+    MyRecyclerViewAdapter(Context context, List<Line> recordings) {
         this.mInflater = LayoutInflater.from(context);
         this.mRecordings = recordings;
         mmr = new MediaMetadataRetriever(); //used to get duration of recording. much lighter than MediaPlayer
@@ -60,7 +61,7 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
         long recordingDurationMilliseconds;
         String recordingDate;
 
-        mmr.setDataSource(mRecordings.get(position).getPath());
+        mmr.setDataSource(mRecordings.get(position).getFile().getPath());
         recordingDuration = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
         recordingDurationMilliseconds = Long.parseLong(recordingDuration);
         recordingDuration = convertMilliSecondsToRecordingTime(recordingDurationMilliseconds);
@@ -150,7 +151,7 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
                 @Override
                 public void onClick(View view) {
                     int position = getAdapterPosition();
-                    File fileToPlay = getItem(position);
+                    File fileToPlay = getItem(position).getFile();
 
                     player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                         @Override
@@ -203,8 +204,14 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
         }
     }
 
+    public void updateList(List<Line> newList){
+        mRecordings = new ArrayList<>();
+        mRecordings.addAll(newList);
+        notifyDataSetChanged();
+    }
+
     // convenience method for getting data at click position
-    File getItem(int id) {
+    Line getItem(int id) {
         return mRecordings.get(id);
     }
 

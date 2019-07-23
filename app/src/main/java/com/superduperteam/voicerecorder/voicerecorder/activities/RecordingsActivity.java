@@ -5,8 +5,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.media.MediaMetadataRetriever;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -17,6 +15,7 @@ import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.SearchView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
@@ -29,19 +28,22 @@ import com.superduperteam.voicerecorder.voicerecorder.BaseActivity;
 import com.superduperteam.voicerecorder.voicerecorder.R;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
-public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenuItemClickListener, MyRecyclerViewAdapter.ItemClickListener {
+public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenuItemClickListener, MyRecyclerViewAdapter.ItemClickListener, SearchView.OnQueryTextListener {
     private RecyclerView recyclerView;
     private List selectedItems;
     private MyRecyclerViewAdapter adapter;
     private File recordingsFolder;
     private MediaMetadataRetriever mediaMetadataRetriever;
     private EditText searchBookmarkEditText;
-    private List<File> recordings;
+    private List<Line> recordings;
+    MenuItem searchRecordingsMenuItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,8 +59,19 @@ public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenu
 
         String folderPath = Objects.requireNonNull(getExternalFilesDir(null)).getAbsolutePath();
         recordingsFolder = new File(folderPath);
-        recordings = new ArrayList<>(Arrays.asList(recordingsFolder.listFiles()));
-
+        recordings = new ArrayList<>();
+        List<File> recordingsFiles = new ArrayList<>(Arrays.asList(recordingsFolder.listFiles()));
+        for(File recordingFile : recordingsFiles ){
+            try {
+                Recording recording = new Recording(recordingFile);
+                recordings.add(recording);
+//                if(recording.getBookmarksList() != null){
+//                    recordings.addAll(recording.getBookmarksList());
+//                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
 
         // set up the RecyclerView
         RecyclerView recyclerView = findViewById(R.id.recordingsLRecyclerView);
@@ -69,63 +82,48 @@ public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenu
 
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(), LinearLayout.VERTICAL);
         recyclerView.addItemDecoration(dividerItemDecoration);
-        searchBookmarkEditText = findViewById(R.id.search_by_bookmark);
-        searchBookmarkEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int start, int count, int after) {
-                final String textToSearch = charSequence.toString();
-
-                recordings = new ArrayList<>(Arrays.asList(recordingsFolder.listFiles()));
-                recordings.removeIf(recording -> {
-                    boolean remove = false;
-                    mediaMetadataRetriever.setDataSource(recording.getPath());
-                    String title = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
-                    if (title == null) {
-                        remove = true;
-                    } else {
-                        remove = !(title.contains(textToSearch));
-                    }
-
-                    if (textToSearch.equals("")) {
-                        remove = false;
-                    }
-
-                    return remove;
-                });
-
-                adapter = new MyRecyclerViewAdapter(getApplicationContext(), recordings);
-
-                recyclerView.swapAdapter(adapter, true);
-                adapter.notifyDataSetChanged();
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-            }
-        });
+     //   searchBookmarkEditText = findViewById(R.id.search_by_bookmark);
+     //   searchBookmarkEditText.addTextChangedListener(new TextWatcher() {
+//            @Override
+//            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+//
+//            }
+//
+//            @Override
+//            public void onTextChanged(CharSequence charSequence, int start, int count, int after) {
+//                final String textToSearch = charSequence.toString();
+//
+//                recordings = new ArrayList<>(Arrays.asList(recordingsFolder.listFiles()));
+//                recordings.removeIf(recording -> {
+//                    boolean remove = false;
+//                    mediaMetadataRetriever.setDataSource(recording.getPath());
+//                    String title = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+//                    if (title == null) {
+//                        remove = true;
+//                    } else {
+//                        remove = !(title.contains(textToSearch));
+//                    }
+//
+//                    if (textToSearch.equals("")) {
+//                        remove = false;
+//                    }
+//
+//                    return remove;
+//                });
+//
+//                adapter = new MyRecyclerViewAdapter(getApplicationContext(), recordings);
+//
+//                recyclerView.swapAdapter(adapter, true);
+//                adapter.notifyDataSetChanged();
+//            }
+//
+//            @Override
+//            public void afterTextChanged(Editable editable) {
+//            }
+//        });
     }
 
 
-        // Saar: This is to make the buttons in the top to show : search and sort
-        @Override
-        public boolean onCreateOptionsMenu (Menu menu){
-            MenuInflater inflater = getMenuInflater();
-            inflater.inflate(R.menu.menu_recordings, menu);
-            MenuItem mMenuItem = menu.findItem(R.id.app_bar_search);
-
-            ActionBar actionbar = getSupportActionBar();
-            Objects.requireNonNull(actionbar).setDisplayHomeAsUpEnabled(true);
-            actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
-//        mMenuItem.setVisible(false);
-//        mMenuItem.setTitle("Deleteeeee");
-//        mMenuItem.setEnabled(false);
-            return super.onCreateOptionsMenu(menu);
-        }
 
 
         // Saar: This is for the actual list of recordings - if user click on the vertical 3 dots.
@@ -207,6 +205,57 @@ public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenu
 
         public void onPlayClick (View view,int position){
         }
+
+
+    // Saar: This is to make the buttons in the top to show : search and sort
+    @Override
+    public boolean onCreateOptionsMenu (Menu menu){
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_recordings, menu);
+        searchRecordingsMenuItem = menu.findItem(R.id.recordings_search);
+
+        ActionBar actionbar = getSupportActionBar();
+        Objects.requireNonNull(actionbar).setDisplayHomeAsUpEnabled(true);
+        actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
+
+        SearchView searchView = (SearchView) searchRecordingsMenuItem.getActionView();
+        searchView.setOnQueryTextListener(this);
+//        mMenuItem.setVisible(false);
+//        mMenuItem.setTitle("Deleteeeee");
+//        mMenuItem.setEnabled(false);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        String userInput = newText.toLowerCase();
+        List<Line> newList = new ArrayList<>();
+
+        for(Line line: recordings){
+            if(line.getName().toLowerCase().contains(userInput)){
+                newList.add(line);
+            }
+            else{
+                if(line instanceof Recording){  // TODO: 7/23/2019 change this
+                    Recording recording = (Recording) line;
+                    for(Bookmark bookmark : recording.getBookmarksList()){
+                        if(bookmark.getName().toLowerCase().contains(userInput)){
+                            newList.add(line);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        adapter.updateList(newList);
+        return true;
+    }
 
 
 //    public void alertSingleChoiceItems(){

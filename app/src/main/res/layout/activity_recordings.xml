@@ -20,25 +20,11 @@
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar" />
 
 
-
-    <EditText
-        android:id="@+id/search_by_bookmark"
-        style="@style/Base.Widget.MaterialComponents.TextInputEditText"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recordingsLRecyclerView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/invisibleToolbar"
-        android:layout_marginEnd="-18dp"
-        android:ems="10"
-        android:hint="Search by bookmark name..."
-        android:inputType="text" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recordingsLRecyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_below="@id/search_by_bookmark"/>
-
-
+        android:layout_height="match_parent"
+        android:layout_below="@id/invisibleToolbar" />
 
 </RelativeLayout>
 

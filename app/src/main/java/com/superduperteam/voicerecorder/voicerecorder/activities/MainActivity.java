@@ -318,7 +318,14 @@ private long pauseOffset = 0;
 
     private void addBookmarksToMetadata() throws IOException {
         MetaDataInsert cmd = new MetaDataInsert();
-        cmd.writeRandomMetadata(lastRecordingPath, bookmarksList.toString());
+        StringBuilder sb = new StringBuilder();
+        sb.append("Bookmarks: ").append(System.lineSeparator());
+
+        for(Bookmark bookmark : bookmarksList){
+            sb.append(bookmark.toString()).append(System.lineSeparator());
+        }
+
+        cmd.writeRandomMetadata(lastRecordingPath, sb.toString());
     }
 
     public void onAddBookmarkClick(View view) {
