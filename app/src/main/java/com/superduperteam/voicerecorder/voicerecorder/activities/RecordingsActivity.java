@@ -244,7 +244,7 @@ public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenu
                 if(line instanceof Recording){  // TODO: 7/23/2019 change this
                     Recording recording = (Recording) line;
                     for(Bookmark bookmark : recording.getBookmarksList()){
-                        if(bookmark.getName().toLowerCase().contains(userInput)){
+                        if(bookmark.getName().toLowerCase().contains(userInput)) {
                             newList.add(line);
                             break;
                         }

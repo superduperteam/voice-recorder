@@ -217,7 +217,6 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
         mRecordings = new ArrayList<>();
         mRecordings.addAll(newList);
         notifyDataSetChanged();
-
     }
 
     // convenience method for getting data at click position

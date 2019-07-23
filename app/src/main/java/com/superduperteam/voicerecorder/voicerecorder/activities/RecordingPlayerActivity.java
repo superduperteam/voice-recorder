@@ -3,6 +3,7 @@ package com.superduperteam.voicerecorder.voicerecorder.activities;
 import android.content.Context;
 
 import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.view.menu.MenuView;
 
 import android.content.Intent;
 import android.media.MediaMetadataRetriever;
@@ -14,6 +15,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageButton;
 
 import com.superduperteam.voicerecorder.voicerecorder.BaseActivity;
 import com.superduperteam.voicerecorder.voicerecorder.R;
@@ -26,6 +28,8 @@ import java.util.Objects;
 public class RecordingPlayerActivity extends BaseActivity {
     private Recording recording;
     private static final String LOG_TAG = "AudioRecordTest";
+    ImageButton playButton;
+    MediaPlayer player = new MediaPlayer();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,10 +57,17 @@ public class RecordingPlayerActivity extends BaseActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        playButton = findViewById(R.id.recordingPlayerPlay);
+        playButton.setBackgroundResource(R.drawable.ic_pause_circle_outline_black_24dp);
+
+        player.setOnCompletionListener(mediaPlayer -> {
+            mediaPlayer.reset();
+            playButton.setBackgroundResource(R.drawable.ic_play_arrow_triangle_alt1);
+        });
     }
 
     private void startPlaying() throws IOException {
-        MediaPlayer player = new MediaPlayer();
         try {
             player.setDataSource(recording.getFile().getPath());
             player.prepare();
@@ -67,8 +78,8 @@ public class RecordingPlayerActivity extends BaseActivity {
             Log.e(LOG_TAG, "prepare() failed");
         }
 
-        MetaDataRead cmd = new MetaDataRead();
-        String text = cmd.read(recording.getFile().getPath());
+
+        System.out.println(recording.getBookmarksList());
     }
 
 // This is for the buttons in the top: search and sort
