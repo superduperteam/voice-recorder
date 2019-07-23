@@ -1,6 +1,7 @@
 package com.superduperteam.voicerecorder.voicerecorder.activities;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
@@ -31,6 +32,7 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
 
     private static final String LOG_TAG = "AudioRecordTest";
     private List<Line> mRecordings;
+    Context context;
     private LayoutInflater mInflater;
     private ItemClickListener mClickListener;
     private MediaMetadataRetriever mmr;
@@ -41,6 +43,7 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
 
     // data is passed into the constructor
     MyRecyclerViewAdapter(Context context, List<Line> recordings) {
+        this.context = context;
         this.mInflater = LayoutInflater.from(context);
         this.mRecordings = recordings;
         mmr = new MediaMetadataRetriever(); //used to get duration of recording. much lighter than MediaPlayer
@@ -200,7 +203,13 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
 
         @Override
         public void onClick(View view) {
-            if (mClickListener != null) mClickListener.onItemClick(view, getAdapterPosition());
+           // if (mClickListener != null) mClickListener.onItemClick(view, getAdapterPosition());
+            int position = getAdapterPosition();
+            File fileToPlay = getItem(position).getFile();
+
+            Intent intent = new Intent(context, RecordingPlayerActivity.class);
+            intent.putExtra("fileToPlayPath", fileToPlay.getAbsolutePath());
+            context.startActivity(intent);
         }
     }
 
@@ -208,6 +217,7 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
         mRecordings = new ArrayList<>();
         mRecordings.addAll(newList);
         notifyDataSetChanged();
+
     }
 
     // convenience method for getting data at click position

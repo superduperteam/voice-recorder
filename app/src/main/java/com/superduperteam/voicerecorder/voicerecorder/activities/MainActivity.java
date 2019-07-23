@@ -312,7 +312,7 @@ private long pauseOffset = 0;
     public void onBookmarkClick(View view) {
         if(isRunning){
             long elapsedTime = SystemClock.elapsedRealtime() - chronometer.getBase();
-            bookmarksList.add(new Bookmark(elapsedTime,"test"));
+            bookmarksList.add(new Bookmark(elapsedTime,""));
         }
     }
 
