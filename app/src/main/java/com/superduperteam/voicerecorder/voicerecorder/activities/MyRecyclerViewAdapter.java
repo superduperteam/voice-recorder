@@ -17,6 +17,8 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.superduperteam.voicerecorder.voicerecorder.R;
+import com.thoughtbot.expandablerecyclerview.ExpandableRecyclerViewAdapter;
+import com.thoughtbot.expandablerecyclerview.viewholders.GroupViewHolder;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,7 +29,8 @@ import java.util.concurrent.TimeUnit;
 
 // Saar: took this from:
 // https://stackoverflow.com/questions/40584424/simple-android-recyclerview-example
-
+//RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder>
+//RecordingViewHolder
 public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder> {
 
     private static final String LOG_TAG = "AudioRecordTest";
@@ -124,6 +127,82 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
         return mRecordings.size();
     }
 
+
+    public class RecordingViewHolder extends GroupViewHolder implements View.OnClickListener{
+        TextView recordingNameTextView;
+        TextView recordingDurationTextView;
+        TextView recordingDate;
+        ImageButton playButton;
+
+        public RecordingViewHolder(View itemView) {
+            super(itemView);
+            recordingNameTextView = itemView.findViewById(R.id.recordingTitle);
+            recordingDurationTextView = itemView.findViewById(R.id.recordingDuration);
+            recordingDate = itemView.findViewById(R.id.recordingDate);
+            playButton = itemView.findViewById(R.id.recordingsPlayImagePlace);
+            playButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    int position = getAdapterPosition();
+                    File fileToPlay = getItem(position).getFile();
+
+                    player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                        @Override
+                        public void onCompletion(MediaPlayer mediaPlayer) {
+                            mediaPlayer.reset();
+                            recordingToResumePosition = -1;
+                            shouldSetDataSource = true;
+                            playButton.setBackgroundResource(R.drawable.ic_play_arrow_triangle_alt1);
+                        }
+                    });
+
+                    if(player.isPlaying() && recordingToResumePosition != position) {
+                        player.reset();
+                        recordingToResumePosition = -1;
+                        shouldSetDataSource = true;
+                        playButton.setBackgroundResource(R.drawable.ic_play_arrow_triangle_alt1);
+                        lastPlayed.setBackgroundResource(R.drawable.ic_play_arrow_triangle_alt1);
+                    }
+                    else if(player.isPlaying() && recordingToResumePosition == position) {
+                        player.pause();
+                        System.out.println("paused");
+                        shouldSetDataSource = false;
+                        playButton.setBackgroundResource(R.drawable.ic_play_arrow_triangle_alt1);
+                    }
+                    else {
+                        try {
+                            System.out.println("going to start..");
+                            recordingToResumePosition = position;
+                            if(shouldSetDataSource) {
+                                player.setDataSource(fileToPlay.getAbsolutePath());
+                                player.prepare();
+                            }
+                            player.start();
+                            lastPlayed = playButton;
+                            playButton.setBackgroundResource(R.drawable.ic_pause_circle_outline_black_24dp);
+                            System.out.print("duration: ");
+                            System.out.println(player.getDuration());
+                        } catch (IOException e) {
+                            Log.e(LOG_TAG, "prepare() failed");
+                        }
+                    }
+                }
+            });
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View view) {
+            // if (mClickListener != null) mClickListener.onItemClick(view, getAdapterPosition());
+            int position = getAdapterPosition();
+            File fileToPlay = getItem(position).getFile();
+
+            Intent intent = new Intent(context, RecordingPlayerActivity.class);
+            intent.putExtra("fileToPlayPath", fileToPlay.getAbsolutePath());
+            context.startActivity(intent);
+        }
+
+    }
 
     // stores and recycles views as they are scrolled off screen
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {

@@ -59,7 +59,7 @@ public class Bookmark implements Line {
 
     @Override
     public String getName() {
-        return text + "from " + recording.getName() ;
+        return text;
     }
 
     @Override
