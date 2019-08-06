@@ -22,7 +22,15 @@ public class Recording implements Line {
     private void fetchBookmarks() throws IOException {
         bookmarksList = new ArrayList<>();
         MetaDataRead cmd = new MetaDataRead();
-        String bookmarksRawData = cmd.read(file.getPath()), currLine;
+        String bookmarksRawData, currLine;
+
+        try {
+            bookmarksRawData = cmd.read(file.getPath());
+        } catch (NullPointerException e) {
+            System.out.println(e);
+            return;
+        }
+
         Scanner scr = new Scanner(bookmarksRawData);
 
         while(scr.hasNextLine()){
