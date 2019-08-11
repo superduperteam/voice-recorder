@@ -11,8 +11,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.PopupMenu;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.SearchView;
@@ -20,7 +18,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
-import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -31,18 +29,18 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
-public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenuItemClickListener, MyRecyclerViewAdapter.ItemClickListener, SearchView.OnQueryTextListener {
+public class RecordingsActivity extends BaseActivity implements SearchView.OnQueryTextListener{
+//public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenuItemClickListener, MyNewRecyclerViewAdapter.ItemClickListener, SearchView.OnQueryTextListener {
     private RecyclerView recyclerView;
     private List selectedItems;
-    private MyRecyclerViewAdapter adapter;
+    private GenreAdapter adapter;
     private File recordingsFolder;
     private MediaMetadataRetriever mediaMetadataRetriever;
     private EditText searchBookmarkEditText;
-    private List<Line> recordings;
+    private List<Recording> recordings;
     MenuItem searchRecordingsMenuItem;
 
     @Override
@@ -63,7 +61,7 @@ public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenu
         List<File> recordingsFiles = new ArrayList<>(Arrays.asList(recordingsFolder.listFiles()));
         for(File recordingFile : recordingsFiles ){
             try {
-                Recording recording = new Recording(recordingFile);
+                Recording recording = new Recording(recordingFile.getName(), recordingFile, Recording.fetchBookmarks(recordingFile));
                 recordings.add(recording);
 //                if(recording.getBookmarksList() != null){
 //                    recordings.addAll(recording.getBookmarksList());
@@ -76,12 +74,18 @@ public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenu
         // set up the RecyclerView
         RecyclerView recyclerView = findViewById(R.id.recordingsLRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new MyRecyclerViewAdapter(this, recordings);
-        adapter.setClickListener(this);
+        RecyclerView.ItemAnimator animator = recyclerView.getItemAnimator();
+        if (animator instanceof DefaultItemAnimator) {
+            ((DefaultItemAnimator) animator).setSupportsChangeAnimations(false);
+        }
+
+        adapter = new GenreAdapter(this, new ArrayList<>(recordings));
+//        adapter = new MyNewRecyclerViewAdapter(this, recordings);
+//        adapter.setClickListener(this);
         recyclerView.setAdapter(adapter);
 
-        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(), LinearLayout.VERTICAL);
-        recyclerView.addItemDecoration(dividerItemDecoration);
+//        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(), LinearLayout.VERTICAL);
+//        recyclerView.addItemDecoration(dividerItemDecoration);
      //   searchBookmarkEditText = findViewById(R.id.search_by_bookmark);
      //   searchBookmarkEditText.addTextChangedListener(new TextWatcher() {
 //            @Override
@@ -124,32 +128,32 @@ public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenu
     }
 
 
-
-
-        // Saar: This is for the actual list of recordings - if user click on the vertical 3 dots.
-        public void onRecordingClick (View view){
-            PopupMenu popup = new PopupMenu(this, view); // view=button
-            popup.setOnMenuItemClickListener(this);
-            popup.inflate(R.menu.recording_clicked_menu);
-            popup.show();
-        }
-        @Override
-        public boolean onMenuItemClick (MenuItem item){
-            switch (item.getItemId()) {
-                case R.id.recording_clicked_delete:
-                    Toast.makeText(this, "delete from recording row", Toast.LENGTH_LONG).show();
-                    return true;
-                case R.id.recording_clicked_edit:
-                    Toast.makeText(this, "edit from recording row", Toast.LENGTH_LONG).show();
-                    return true;
-                case R.id.recording_clicked_share:
-                    Toast.makeText(this, "share from recording row", Toast.LENGTH_LONG).show();
-                    return true;
-                default:
-                    return false;
-            }
-        }
-
+//
+//
+//        // Saar: This is for the actual list of recordings - if user click on the vertical 3 dots.
+//        public void onRecordingClick (View view){
+//            PopupMenu popup = new PopupMenu(this, view); // view=button
+//            popup.setOnMenuItemClickListener(this);
+//            popup.inflate(R.menu.recording_clicked_menu);
+//            popup.show();
+//        }
+//        @Override
+//        public boolean onMenuItemClick (MenuItem item){
+//            switch (item.getItemId()) {
+//                case R.id.recording_clicked_delete:
+//                    Toast.makeText(this, "delete from recording row", Toast.LENGTH_LONG).show();
+//                    return true;
+//                case R.id.recording_clicked_edit:
+//                    Toast.makeText(this, "edit from recording row", Toast.LENGTH_LONG).show();
+//                    return true;
+//                case R.id.recording_clicked_share:
+//                    Toast.makeText(this, "share from recording row", Toast.LENGTH_LONG).show();
+//                    return true;
+//                default:
+//                    return false;
+//            }
+//        }
+//
         // Saar: This is for Sort button
         public void onSortClick (MenuItem item){
             alertSortElements();
@@ -198,13 +202,13 @@ public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenu
                     }).show();
         }
 
-        @Override
-        public void onItemClick (View view,int position){
-            Toast.makeText(this, "You clicked " + adapter.getItem(position) + " on row number " + position, Toast.LENGTH_SHORT).show();
-        }
-
-        public void onPlayClick (View view,int position){
-        }
+//        @Override
+//        public void onItemClick (View view,int position){
+//            Toast.makeText(this, "You clicked " + adapter.getItem(position) + " on row number " + position, Toast.LENGTH_SHORT).show();
+//        }
+//
+//        public void onPlayClick (View view,int position){
+//        }
 
 
     // Saar: This is to make the buttons in the top to show : search and sort
@@ -231,23 +235,59 @@ public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenu
         return false;
     }
 
+//    @Override
+//    public boolean onQueryTextChange(String newText) {
+//        String userInput = newText.toLowerCase();
+//        List<Recording> newList = new ArrayList<>();
+//
+//        for(Recording recording: recordings){
+//            if(recording.getTitle().toLowerCase().contains(userInput)){
+//                newList.add(recording);
+//            }
+//            else{
+//                for(Bookmark bookmark : recording.getBookmarksList()){
+//                    if(bookmark.getTitle().toLowerCase().contains(userInput)) {
+//                        newList.add(recording);
+//                        break;
+//                    }
+//                }
+//            }
+//        }
+//
+//        adapter.updateList(newList);
+//        return true;
+//    }
+
     @Override
     public boolean onQueryTextChange(String newText) {
         String userInput = newText.toLowerCase();
-        List<Line> newList = new ArrayList<>();
+        List<Recording> newList = new ArrayList<>();
 
-        for(Line line: recordings){
-            if(line.getName().toLowerCase().contains(userInput)){
-                newList.add(line);
+        for(Recording recording: recordings){
+            if(recording.getTitle().toLowerCase().contains(userInput)){
+                recording.setShouldExpand(false);
+                newList.add(recording);
             }
             else{
-                if(line instanceof Recording){  // TODO: 7/23/2019 change this
-                    Recording recording = (Recording) line;
-                    for(Bookmark bookmark : recording.getBookmarksList()){
-                        if(bookmark.getName().toLowerCase().contains(userInput)) {
-                            newList.add(line);
-                            break;
-                        }
+                // Saar: If we are here, it means the recording is not matching the userInput.
+                // Now we want to check if it has matching bookmarks - if so, we want to include only these bookmarks.
+
+                List<Bookmark> matchingBookmarks = new ArrayList<>();
+
+                for(Bookmark bookmark : recording.getBookmarksList()){
+                    if(bookmark.getTitle().toLowerCase().contains(userInput)) {
+                        matchingBookmarks.add(bookmark);
+                        break;
+                    }
+                }
+
+                if(matchingBookmarks.size() != 0){
+                    try {
+                        Recording newRecording = new Recording(recording.getTitle(), recording.getFile(), matchingBookmarks);
+                        newRecording.setShouldExpand(true);
+                        newList.add(newRecording);
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                 }
             }
