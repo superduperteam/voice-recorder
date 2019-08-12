@@ -83,19 +83,19 @@ public class GenreAdapter extends CustomExpandableRecyclerViewAdapter<GenreAdapt
 
     final Bookmark bookmark = ((Recording) group).getItems().get(childIndex);
     holder.setBookmarkText(bookmark.getTitle());
+    holder.setTimeText(convertMilliSecondsToRecordingTime(bookmark.getTimestamp()));
   }
 
   @Override
   public void onBindGroupViewHolder(RecordingViewHolder holder, int flatPosition,
       ExpandableGroup group) {
 
-      List<Recording> mRecordings = (List<Recording>)expandableList.groups;
-      String recordingName = mRecordings.get(flatPosition).getTitle();
+      String recordingName = getItem(flatPosition).getTitle();
       String recordingDuration;
       long recordingDurationMilliseconds;
       String recordingDate;
 
-      mmr.setDataSource(mRecordings.get(flatPosition).getFile().getPath());
+      mmr.setDataSource(getItem(flatPosition).getFile().getPath());
       recordingDuration = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
       recordingDurationMilliseconds = Long.parseLong(recordingDuration);
       recordingDuration = convertMilliSecondsToRecordingTime(recordingDurationMilliseconds);
@@ -105,9 +105,10 @@ public class GenreAdapter extends CustomExpandableRecyclerViewAdapter<GenreAdapt
       holder.recordingDate.setText(recordingDate);
       holder.recordingDurationTextView.setText(recordingDuration);
       holder.recordingNameTextView.setText(recordingName);
+      holder.recordingBookmarksCount.setText(String.valueOf(group.getItemCount()));
 
 
-    holder.setGenreTitle(group);
+      holder.setRecordingTitle(group);
   }
 
     private final static int YEAR_START_INDEX = 0;
@@ -160,11 +161,13 @@ public class GenreAdapter extends CustomExpandableRecyclerViewAdapter<GenreAdapt
         notifyDataSetChanged();
 
 //        expandAll();
-     //   expandRecordingGroupsThatShouldBeExpanded();
+ //       expandRecordingGroupsThatShouldBeExpanded();
 //        notifyGroupDataChanged();
     }
 
     private void expandRecordingGroupsThatShouldBeExpanded() {
+//        togglGroupsThatShouldBeExpanded1();
+
 //        for(ExpandableGroup recordingGroup : getGroups()){
 //            if(((Recording) recordingGroup).isShouldExpand()){
 //                if(!isGroupExpanded(recordingGroup)){
@@ -173,15 +176,49 @@ public class GenreAdapter extends CustomExpandableRecyclerViewAdapter<GenreAdapt
 //                }
 //            }
 //        }
-        for(int i=0; i<getGroups().size(); i++){
-            Recording currRecording = (Recording)getGroups().get(i);
-            if(currRecording.isShouldExpand()){
-                if(!isGroupExpanded(getGroups().get(i))){
-                    boolean isExpanded = toggleGroup(getGroups().get(i));
-                    System.out.println(isExpanded);
-                }
+//        for(int i=0; i<getGroups().size(); i++){
+//            Recording currRecording = (Recording)getGroups().get(i);
+//            if(currRecording.isShouldExpand()){
+//                if(!isGroupExpanded(getGroups().get(i))){
+////                    boolean isExpanded = toggleGroup(getGroups().get(i));
+////                    System.out.println(isExpanded);
+//
+//                }
+//
+//            }
+//        }
+        for(int i=0; i<getGroups().size();i++){
 
-            }
+        }
+    }
+
+    public void notifyGroupDataChanged() {
+        expandableList.expandedGroupIndexes = new boolean[getGroups().size()];
+        for (int i = 0; i < getGroups().size(); i++) {
+            expandableList.expandedGroupIndexes[i] = false;
+        }
+    }
+
+    public void togglGroupsThatShouldBeExpanded1() {
+        for (int i = 0; i < getGroups().size(); i++) {
+            toggleGroup(getFlattenedGroupPosition(i));
+        }
+    }
+
+    public int getFlattenedGroupPosition(int groupIndex) {
+        int runningTotal = 0;
+        for (int i = 0; i < groupIndex; i++) {
+            runningTotal += numberOfVisibleItemsInGroup(i);
+        }
+        return runningTotal;
+    }
+
+    private int numberOfVisibleItemsInGroup(int group) {
+        boolean[] clone = expandableList.expandedGroupIndexes.clone();
+        if (clone[group]) {
+            return expandableList.groups.get(group).getItemCount() + 1;
+        } else {
+            return 1;
         }
     }
 
@@ -213,6 +250,7 @@ public class GenreAdapter extends CustomExpandableRecyclerViewAdapter<GenreAdapt
       TextView recordingDate;
       TextView recordingNameTextView;
       TextView recordingDurationTextView;
+      TextView recordingBookmarksCount;
       ImageButton playButton;
       private ImageButton bookmarksExpandButton;
       private OnGroupClickListener listener;
@@ -223,6 +261,7 @@ public class GenreAdapter extends CustomExpandableRecyclerViewAdapter<GenreAdapt
           recordingNameTextView = itemView.findViewById(R.id.recordingTitle);
           recordingDurationTextView = itemView.findViewById(R.id.recordingDuration);
           recordingDate = itemView.findViewById(R.id.recordingDate);
+          recordingBookmarksCount = itemView.findViewById(R.id.recordingBookmarksCount2);
           playButton = itemView.findViewById(R.id.recordingsPlayImagePlace);
           bookmarksExpandButton = itemView.findViewById(R.id.recordingBookmarksPlace);
           bookmarksExpandButton.setOnClickListener(this);
@@ -230,8 +269,7 @@ public class GenreAdapter extends CustomExpandableRecyclerViewAdapter<GenreAdapt
             @Override
             public void onClick(View v) {
               int position = getAdapterPosition();
-              toggleGroup(position); // TODO: 8/11/2019
-  //              toggleGroup(getGroups().get(position));
+              toggleGroup(position);
             }
           });
 
@@ -307,7 +345,7 @@ public class GenreAdapter extends CustomExpandableRecyclerViewAdapter<GenreAdapt
           this.listener = listener;
       }
 
-      public void setGenreTitle(ExpandableGroup recording) {
+      public void setRecordingTitle(ExpandableGroup recording) {
               recordingNameTextView.setText(recording.getTitle());
       }
 

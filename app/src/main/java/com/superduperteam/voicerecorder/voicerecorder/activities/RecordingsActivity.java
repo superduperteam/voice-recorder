@@ -11,6 +11,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.SearchView;
@@ -19,6 +20,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -61,7 +63,7 @@ public class RecordingsActivity extends BaseActivity implements SearchView.OnQue
         List<File> recordingsFiles = new ArrayList<>(Arrays.asList(recordingsFolder.listFiles()));
         for(File recordingFile : recordingsFiles ){
             try {
-                Recording recording = new Recording(recordingFile.getName(), recordingFile, Recording.fetchBookmarks(recordingFile));
+                Recording recording = new Recording(recordingFile.getName().substring(0,recordingFile.getName().indexOf(".")), recordingFile, Recording.fetchBookmarks(recordingFile));
                 recordings.add(recording);
 //                if(recording.getBookmarksList() != null){
 //                    recordings.addAll(recording.getBookmarksList());
@@ -84,8 +86,8 @@ public class RecordingsActivity extends BaseActivity implements SearchView.OnQue
 //        adapter.setClickListener(this);
         recyclerView.setAdapter(adapter);
 
-//        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(), LinearLayout.VERTICAL);
-//        recyclerView.addItemDecoration(dividerItemDecoration);
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(), LinearLayout.VERTICAL);
+        recyclerView.addItemDecoration(dividerItemDecoration); // TODO: 8/12/2019 Optional - decide if its better with/without
      //   searchBookmarkEditText = findViewById(R.id.search_by_bookmark);
      //   searchBookmarkEditText.addTextChangedListener(new TextWatcher() {
 //            @Override
@@ -265,30 +267,25 @@ public class RecordingsActivity extends BaseActivity implements SearchView.OnQue
 
         for(Recording recording: recordings){
             if(recording.getTitle().toLowerCase().contains(userInput)){
-                recording.setShouldExpand(false);
+                recording.getBookmarksList().forEach(Bookmark::removeTheHighlightFromText);
                 newList.add(recording);
             }
             else{
                 // Saar: If we are here, it means the recording is not matching the userInput.
-                // Now we want to check if it has matching bookmarks - if so, we want to include only these bookmarks.
-
-                List<Bookmark> matchingBookmarks = new ArrayList<>();
+                // Now we want to check if it has matching bookmarks - if so, we want to mark these bookmarks.
+                int matchingBookmarksCount = 0;
 
                 for(Bookmark bookmark : recording.getBookmarksList()){
-                    if(bookmark.getTitle().toLowerCase().contains(userInput)) {
-                        matchingBookmarks.add(bookmark);
-                        break;
+                    if(bookmark.getTitle().toString().toLowerCase().contains(userInput)) {
+                        int start = bookmark.getTitle().toString().toLowerCase().indexOf(userInput);
+                        int end = start + userInput.length();
+                        bookmark.highlightText(start, end);
+                        matchingBookmarksCount++;
                     }
                 }
 
-                if(matchingBookmarks.size() != 0){
-                    try {
-                        Recording newRecording = new Recording(recording.getTitle(), recording.getFile(), matchingBookmarks);
-                        newRecording.setShouldExpand(true);
-                        newList.add(newRecording);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                if(matchingBookmarksCount > 0){
+                    newList.add(recording);
                 }
             }
         }
@@ -296,6 +293,45 @@ public class RecordingsActivity extends BaseActivity implements SearchView.OnQue
         adapter.updateList(newList);
         return true;
     }
+
+//    @Override
+//    public boolean onQueryTextChange(String newText) {
+//        String userInput = newText.toLowerCase();
+//        List<Recording> newList = new ArrayList<>();
+//
+//        for(Recording recording: recordings){
+//            if(recording.getTitle().toLowerCase().contains(userInput)){
+//                recording.setShouldExpand(false);
+//                newList.add(recording);
+//            }
+//            else{
+//                // Saar: If we are here, it means the recording is not matching the userInput.
+//                // Now we want to check if it has matching bookmarks - if so, we want to include only these bookmarks.
+//
+//                List<Bookmark> matchingBookmarks = new ArrayList<>();
+//
+//                for(Bookmark bookmark : recording.getBookmarksList()){
+//                    if(bookmark.getTitle().toLowerCase().contains(userInput)) {
+//                        matchingBookmarks.add(bookmark);
+//                        break;
+//                    }
+//                }
+//
+//                if(matchingBookmarks.size() != 0){
+//                    try {
+//                        Recording newRecording = new Recording(recording.getTitle(), recording.getFile(), matchingBookmarks);
+//                        newRecording.setShouldExpand(true);
+//                        newList.add(newRecording);
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//            }
+//        }
+//
+//        adapter.updateList(newList);
+//        return true;
+//    }
 
 
 //    public void alertSingleChoiceItems(){

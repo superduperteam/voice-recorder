@@ -12,11 +12,4 @@ public abstract class CustomExpandableRecyclerViewAdapter<GVH extends GroupViewH
     public CustomExpandableRecyclerViewAdapter(List<? extends ExpandableGroup> groups) {
         super(groups);
     }
-
-    public void notifyGroupDataChanged() {
-        expandableList.expandedGroupIndexes = new boolean[getGroups().size()];
-        for (int i = 0; i < getGroups().size(); i++) {
-            expandableList.expandedGroupIndexes[i] = false;
-        }
-    }
 }

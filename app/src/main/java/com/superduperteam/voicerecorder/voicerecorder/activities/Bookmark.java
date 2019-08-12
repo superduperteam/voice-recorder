@@ -1,13 +1,20 @@
 package com.superduperteam.voicerecorder.voicerecorder.activities;
 
+import android.graphics.Typeface;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
 
 import java.io.File;
 
 public class Bookmark implements Parcelable {
     private long timestamp;
-    private String text;
+    private Spannable text;
+    private StyleSpan styleSpan;
     private Recording recording;
     private File recordingFile;
     private static final String timestampDelimiter = "timestamp: ";
@@ -16,23 +23,23 @@ public class Bookmark implements Parcelable {
 
     public Bookmark(Long timestamp, String text) {
         this.timestamp = timestamp;
-        this.text = text;
+        this.text = new SpannableString(text);
     }
 
     public Bookmark(Long timestamp, String text, File recordingFile) {
         this.timestamp = timestamp;
-        this.text = text;
+        this.text = new SpannableString(text);
         this.recordingFile = recordingFile;
     }
 
     public Bookmark(Long timestamp, String text, Recording recording) {
         this.timestamp = timestamp;
-        this.text = text;
+        this.text = new SpannableString(text);
         this.recording = recording;
     }
 
     protected Bookmark(Parcel in) {
-        text = in.readString();
+        text = new SpannableString(in.readString());
     }
 
     public Long getTimestamp() {
@@ -65,7 +72,7 @@ public class Bookmark implements Parcelable {
         return null; // TODO: 8/11/2019 maybe better to throw exception here
     }
 
-    public String getTitle() {
+    public Spannable getTitle() {
         return text;
     }
 
@@ -84,7 +91,7 @@ public class Bookmark implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(text);
+        dest.writeString(text.toString());
     }
 
     public static final Creator<Bookmark> CREATOR = new Creator<Bookmark>() {
@@ -98,4 +105,17 @@ public class Bookmark implements Parcelable {
             return new Bookmark[size];
         }
     };
+
+    public void removeTheHighlightFromText(){
+        if(styleSpan != null){
+            text.removeSpan(styleSpan);
+        }
+    }
+
+    public void highlightText(int start, int end) {
+        removeTheHighlightFromText();
+
+        styleSpan  = new StyleSpan(Typeface.BOLD);
+        text.setSpan(styleSpan, start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+    }
 }

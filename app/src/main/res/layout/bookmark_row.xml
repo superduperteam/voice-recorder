@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="12dp">
+
+  <!--<ImageView-->
+  <!--android:id="@+id/playImagePlace"-->
+  <!--android:layout_width="75dp"-->
+  <!--android:layout_height="75dp"-->
+  <!--android:src="@mipmap/ic_launcher" />-->
+
+  <TextView
+      android:id="@+id/bookmark_name"
+      android:layout_width="142dp"
+      android:layout_height="25dp"
+
+      android:layout_marginStart="36dp"
+      android:padding="0dp"
+      android:paddingStart="0dp"
+      android:paddingLeft="0dp"
+      android:paddingTop="0dp"
+      android:paddingEnd="0dp"
+      android:paddingRight="0dp"
+      android:paddingBottom="0dp"
+      android:textAllCaps="false"
+      android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+      android:textColor="#A3000000"
+      android:textSize="18sp"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintStart_toEndOf="@+id/bookmark_row_bookmark_icon"
+      app:layout_constraintTop_toTopOf="parent"
+      tools:text="Some Text" />
+
+  <TextView
+      android:id="@+id/bookmark_time"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_alignParentBottom="true"
+      android:layout_centerVertical="true"
+      android:layout_marginStart="8dp"
+      android:layout_marginEnd="8dp"
+      android:textColor="#A3000000"
+      android:textSize="16sp"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintHorizontal_bias="0.357"
+      app:layout_constraintStart_toEndOf="@+id/bookmark_name"
+      app:layout_constraintTop_toTopOf="parent"
+      app:layout_constraintVertical_bias="0.527"
+      tools:text="4:50" />
+
+  <ImageButton
+      android:id="@+id/bookmark_row_bookmark_icon"
+      android:layout_width="20dp"
+      android:layout_height="20dp"
+      android:layout_alignParentBottom="true"
+      android:layout_marginStart="40dp"
+      android:background="@drawable/ic_bookmark"
+      android:contentDescription="TODO"
+      android:onClick="onRecordingClick"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent"
+      app:layout_constraintVertical_bias="0.515" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
