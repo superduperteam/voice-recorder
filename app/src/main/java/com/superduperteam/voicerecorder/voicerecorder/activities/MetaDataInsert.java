@@ -63,7 +63,7 @@ public class MetaDataInsert {
         }
     }
 
-    public void writeRandomMetadata(String videoFilePath, String title) throws IOException {
+    public void writeMetadata(String videoFilePath, String title) throws IOException {
 
         File videoFile = new File(videoFilePath);
         if (!videoFile.exists()) {

@@ -31,19 +31,51 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         android:textColor="#ad1457" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="27dp"
-        android:text="Equalizer Placeholder"
-        android:layout_marginTop="16dp"
-        android:layout_gravity="center"/>
+    <!--<com.chibde.audiovisulaizer.visualizer.LineBarVisualizer-->
+        <!--android:id="@+id/visualizer"-->
+        <!--android:layout_gravity="center"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="250dp"/>-->
+
+    <!--<com.gauravk.audiovisualizer.visualizer.BlastVisualizer-->
+        <!--xmlns:custom="http://schemas.android.com/apk/res-auto"-->
+        <!--android:id="@+id/blast"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--custom:avDensity="0.8"-->
+        <!--custom:avType="fill"-->
+        <!--custom:avColor="@color/av_dark_blue"-->
+        <!--custom:avSpeed="normal"-->
+        <!--android:layout_gravity="center"-->
+        <!--/>-->
+
+    <com.superduperteam.voicerecorder.voicerecorder.VisualizerView
+        android:id="@+id/visualizer"
+        android:layout_width="420dp"
+        android:layout_height="205dp"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="center"
+        android:layout_margin="5dp" />
+
+    <!--<com.tyorikan.voicerecordingvisualizer.VisualizerView-->
+        <!--android:id="@+id/visualizer"-->
+        <!--android:layout_width="100dp"-->
+        <!--android:layout_height="100dp"-->
+        <!--android:layout_gravity="center"-->
+        <!--android:layout_marginTop="@dimen/spacing_large"-->
+        <!--android:background="@android:color/black"-->
+        <!--app:numColumns="4"-->
+        <!--app:renderColor="#B3E5FC"-->
+        <!--app:renderRange="top"-->
+        <!--app:renderType="bar|fade" />-->
 
 
     <RelativeLayout
         android:layout_width="411dp"
         android:layout_height="102dp"
-        android:layout_gravity="center"
-        android:layout_marginTop="200dp">
+        android:layout_gravity="bottom"
+        android:layout_marginTop="200dp"
+        android:layout_marginBottom="2dp">
 
         <ImageButton
             android:id="@+id/record_button"
@@ -61,7 +93,7 @@
             android:layout_marginRight="35dp"
             android:layout_toLeftOf="@id/record_button"
             android:background="@drawable/ic_stop"
-            android:onClick="onStopClick"/>
+            android:onClick="onStopClick" />
 
         <ImageButton
             android:id="@+id/bookmark_image_button"
@@ -71,8 +103,7 @@
             android:layout_marginLeft="60dp"
             android:layout_toRightOf="@id/record_button"
             android:background="@drawable/ic_bookmark"
-            android:onClick="onBookmarkClick"
-            />
+            android:onClick="onBookmarkClick" />
     </RelativeLayout>
 
 </LinearLayout>
