@@ -7,6 +7,7 @@ import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.View;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,6 +29,7 @@ import java.util.List;
             linePaint = new Paint(); // create Paint for lines
             linePaint.setColor(Color.RED); // set color to green
             linePaint.setStrokeWidth(LINE_WIDTH); // set stroke width
+            linePaint.setStyle(Paint.Style.STROKE);
         }
 
         // called when the dimensions of the View change
@@ -53,7 +55,7 @@ import java.util.List;
             }
         }
 
-        // draw the visualizer with scaled lines representing the amplitudes
+//         draw the visualizer with scaled lines representing the amplitudes
         @Override
         public void onDraw(Canvas canvas) {
             int middle = height / 2; // get the middle of the View
@@ -69,5 +71,38 @@ import java.util.List;
                         - scaledHeight / 2, linePaint);
             }
         }
+
+//        public static byte floatToByteArray(float value) {
+//            int intBits =  Float.floatToIntBits(value);
+//            return (byte) (intBits >> 24);
+//        }
+
+//        Paint middleLine = new Paint();
+//        @Override
+//        protected void onDraw(Canvas canvas) {
+//            if (amplitudes.size() != 0) {
+//                middleLine.setColor(Color.RED);
+//                int density = 70;
+//                int gap = 4;
+//                float barWidth = getWidth() / density;
+//                float div = amplitudes.size() / density;
+//                canvas.drawLine(0, getHeight() / 2, getWidth(), getHeight() / 2, middleLine);
+//                linePaint.setStrokeWidth(barWidth - 4);
+//
+//                for(byte amp : amplitudes){
+//                    for (int i = 0; i < density; i++) {
+//                        int bytePosition = (int) Math.ceil(i * div);
+//                        int top = getHeight() / 2 + (128 - Math.abs(amplitudes.get(bytePosition))) * (getHeight() / 2) / 128;
+//
+//                        int bottom = getHeight() / 2 - (128 - Math.abs(amplitudes.get(bytePosition))) * (getHeight() / 2) / 128;
+//
+//                        float barX = (i * barWidth) + (barWidth / 2);
+//                        canvas.drawLine(barX, bottom, barX, getHeight() / 2, linePaint);
+//                        canvas.drawLine(barX, top, barX, getHeight() / 2, linePaint);
+//                    }
+//                }
+//                super.onDraw(canvas);
+//            }
+//        }
 
     }

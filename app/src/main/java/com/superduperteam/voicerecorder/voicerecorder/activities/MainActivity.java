@@ -1,15 +1,27 @@
 package com.superduperteam.voicerecorder.voicerecorder.activities;
 
 import android.Manifest;
+import android.app.IntentService;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.SystemClock;
 
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import android.util.Log;
 import android.view.Gravity;
@@ -21,6 +33,8 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+import android.widget.RemoteViews;
+import android.widget.Toast;
 
 import com.superduperteam.voicerecorder.voicerecorder.BaseActivity;
 import com.superduperteam.voicerecorder.voicerecorder.R;
@@ -35,22 +49,24 @@ import java.util.Objects;
 // TODO: 8/20/2019 saar: probably need to implement onClose (user might close the app while recording)
 public class MainActivity extends BaseActivity {
 
+    NotificationPanel nPanel;
+
+
+    ActionReceiver actionReceiver;
    // private DrawerLayout drawerLayout;
     private Chronometer chronometer;
-    //private boolean isStart;
     private volatile boolean isRecording = false; // is actively recording something?
     private String lastRecordingPath = null;
     private String outputFormat = ".m4a"; // TODO: 7/18/2019  might wantto change to ".m4a"
-    private int recordingNum = 0;
     private List<Bookmark> bookmarksList;
     private ImageButton bookmarkImageButton;
     private EditText bookmarkNameEditText;
     private View addBookmarkView;
     private PopupWindow addBookmarkPopupWindow;
+    private String STOP_RECORDING_ACTION = "stop";
     //voice recorder
     private static final String LOG_TAG = "AudioRecordTest";
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
-    private static String defaultFileName = "Recording";
 
     private MediaRecorder recorder = null;
 //    private RecordingSampler recordingSampler;
@@ -106,6 +122,10 @@ public class MainActivity extends BaseActivity {
 //        recordingSampler.link(VisualizerView);     // link to visualizer
 //
 //        recordingSampler.startRecording();
+
+
+        actionReceiver = new ActionReceiver();
+        registerReceiver(actionReceiver, new IntentFilter(STOP_RECORDING_ACTION));
 
     }
 
@@ -194,6 +214,9 @@ public class MainActivity extends BaseActivity {
 
             startStopWatch();
             startRecording(isRunning);
+            nPanel = new NotificationPanel(this);
+//            notificationTest();
+
             isRunning = true;
         } else {
             findViewById(R.id.record_button).setBackgroundResource(R.drawable.ic_record_button);
@@ -204,18 +227,32 @@ public class MainActivity extends BaseActivity {
         isRecording = !isRecording;
     }
 
+    @Override
+    public void onDestroy() {
+
+        try{
+            if(actionReceiver!=null)
+                unregisterReceiver(actionReceiver);
+
+        }catch(Exception e){}
+
+        super.onDestroy();
+    }
+
     public void onStopClick(View view) throws IOException {
         if(isRunning){
             resetStopWatch();
             findViewById(R.id.record_button).setBackgroundResource(R.drawable.ic_record_button);
             stopRecording();
+            if(nPanel != null){
+                nPanel.notificationCancel();
+            }
             isRunning = false;
             isRecording = false;
             //stopStopWatch();
             //    stopRecording();
         }
     }
-
 //    private void stopStopWatch() {
 //        chronometer.setBase(SystemClock.elapsedRealtime());
 //        chronometer.stop();
@@ -260,7 +297,6 @@ private long pauseOffset = 0;
         recorder.stop();
         recorder.release();
         recorder = null;
-        recordingNum++;
 
         handler.removeCallbacks(updateVisualizer);
         visualizerView.clear();
@@ -388,4 +424,153 @@ private long pauseOffset = 0;
 
         addBookmarkPopupWindow.dismiss();
     }
+
+    // ********************************* Inner Class from here *********************************
+    public static class NotificationPanel {
+
+        private Context parent;
+        private NotificationManager nManager;
+        private NotificationCompat.Builder nBuilder;
+        private RemoteViews remoteView;
+
+        public NotificationPanel(Context parent) {
+            // TODO Auto-generated constructor stub
+            this.parent = parent;
+            String CHANNEL_ID = "my_channel_01";
+            nManager = (NotificationManager) parent.getSystemService(NOTIFICATION_SERVICE);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                CharSequence name = parent.getString(R.string.app_name);
+                int importance = NotificationManager.IMPORTANCE_LOW;
+                NotificationChannel mChannel = new NotificationChannel(CHANNEL_ID, name, importance);
+                mChannel.setSound(null, null);
+                assert nManager != null;
+                nManager.createNotificationChannel(mChannel);
+            }
+
+//            Notification.Builder notiBuilder = new Notification.Builder(parent)
+//                    .setSmallIcon(R.drawable.ic_record_button)
+//                    .setOngoing(true);
+
+            nBuilder = new NotificationCompat.Builder(parent)
+                    .setContentTitle("Parking Meter")
+                    .setSmallIcon(R.drawable.ic_record_button)
+                    .setChannelId(CHANNEL_ID)
+                    .setTicker(null)
+                    .setSound(null)
+                    .setOngoing(true);
+
+
+            remoteView = new RemoteViews(parent.getPackageName(), R.layout.recording_controls_in_notification_area);
+
+            //set the button listeners
+            setListeners(remoteView);
+            nBuilder.setContent(remoteView);
+//            notiBuilder.setCustomContentView(remoteView);
+
+            nManager.notify(2, nBuilder.build());
+        }
+
+        public void setListeners(RemoteViews view){
+
+            Intent intent = new Intent("stop");
+            PendingIntent pendingSwitchIntent = PendingIntent.getBroadcast(parent, 0, intent, 0);
+
+            view.setOnClickPendingIntent(R.id.btn2, pendingSwitchIntent);
+
+//
+//
+//
+//            //listener 1
+//            Intent volume = new Intent("volume");
+//            volume.putExtra("DO", "volume");
+//            PendingIntent btn1 = PendingIntent.getActivity(parent, 0, volume, 0);
+//            view.setOnClickPendingIntent(R.id.btn1, btn1);
+//
+//            //listener 2
+//            Intent stop = new Intent("stop");
+//            stop.putExtra("DO", "stop");
+//            PendingIntent btn2 = PendingIntent.getActivity(parent, 1, stop, 0);
+//            view.setOnClickPendingIntent(R.id.btn2, btn2);
+        }
+
+        public void notificationCancel() {
+            nManager.cancel(2);
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+    public class ActionReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+//            Toast.makeText(context,"recieved", Toast.LENGTH_SHORT).show();
+
+            try {
+                onStopClick(null);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            //This is used to close the notification tray
+            Intent it = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+            context.sendBroadcast(it);
+        }
+    }
+
+
+
+
+
+    // ********************************* Inner Class from here *********************************
+//    public static class NotificationReturnSlot extends IntentService {
+//        /**
+//         * Creates an IntentService.  Invoked by your subclass's constructor.
+//         *
+//         * @param name Used to name the worker thread, important only for debugging.
+//         */
+//        public NotificationReturnSlot(String name) {
+//            super(name);
+//        }
+//
+//    //    @Override
+//    //    protected void onCreate(Bundle savedInstanceState) {
+//    //        // TODO Auto-generated method stub
+//    //        super.onCreate(savedInstanceState);
+//    //        String action = (String) getIntent().getExtras().get("DO");
+//    //        if (action.equals("volume")) {
+//    //            Log.i("NotificationReturnSlot", "volume");
+//    //            //Your code
+//    //        } else if (action.equals("stopNotification")) {
+//    //            //Your code
+//    //
+//    //            Log.i("NotificationReturnSlot", "stopNotification");
+//    //        }
+//    //        finish();
+//    //    }
+//
+//        @Override
+//        protected void onHandleIntent(@Nullable Intent intent) {
+//            String action = (String) intent.getExtras().get("DO");
+//            if (action.equals("volume")) {
+//                Log.i("NotificationReturnSlot", "volume");
+//                //Your code
+//            } else if (action.equals("stopNotification")) {
+//                //Your code
+//
+//                Log.i("NotificationReturnSlot", "stopNotification");
+//            }
+//        }
+//    }
 }

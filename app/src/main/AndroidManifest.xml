@@ -17,9 +17,9 @@
         <activity
             android:name=".BaseActivity"
             android:label="@string/title_activity_base"
-            android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-            >
+            android:theme="@style/ThemeOverlay.AppCompat.ActionBar">
         </activity>
+
         <activity android:name=".activities.RecordingPlayerActivity" />
         <activity
             android:name=".activities.settingsActivity.SettingsActivity"
