@@ -1,8 +1,6 @@
 package com.superduperteam.voicerecorder.voicerecorder.activities;
 
 import android.Manifest;
-import android.app.IntentService;
-import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -18,10 +16,8 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.SystemClock;
 
-import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
 
 import android.util.Log;
 import android.view.Gravity;
@@ -34,7 +30,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.RemoteViews;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import com.superduperteam.voicerecorder.voicerecorder.BaseActivity;
 import com.superduperteam.voicerecorder.voicerecorder.R;
@@ -63,10 +59,13 @@ public class MainActivity extends BaseActivity {
     private EditText bookmarkNameEditText;
     private View addBookmarkView;
     private PopupWindow addBookmarkPopupWindow;
-    private String STOP_RECORDING_ACTION = "stop";
+    private static final String STOP_RECORDING_ACTION = "stop";
+    private static final String PAUSE_OR_RESUME_RECORDING_ACTION = "pauseOrResume";
     //voice recorder
     private static final String LOG_TAG = "AudioRecordTest";
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
+    private static final String CHANNEL_ID = "my_channel_01";
+
 
     private MediaRecorder recorder = null;
 //    private RecordingSampler recordingSampler;
@@ -126,6 +125,7 @@ public class MainActivity extends BaseActivity {
 
         actionReceiver = new ActionReceiver();
         registerReceiver(actionReceiver, new IntentFilter(STOP_RECORDING_ACTION));
+        registerReceiver(actionReceiver, new IntentFilter(PAUSE_OR_RESUME_RECORDING_ACTION));
 
     }
 
@@ -194,6 +194,26 @@ public class MainActivity extends BaseActivity {
             @Override
             public void onChronometerTick(Chronometer chronometerChanged) {
                 chronometer = chronometerChanged;
+                TextView time = findViewById(R.id.notification_recording_time);
+                if(time != null){
+                    time.setText(chronometerChanged.getText());
+                }
+
+                if(nPanel != null){
+                    if(nPanel.getRemoteView() != null){
+                        nPanel.getRemoteView().setTextViewText(R.id.notification_recording_time, chronometerChanged.getText());
+
+                        // update the notification
+//                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
+//                            nPanel.getNotificationManager().notify(2, );
+//                        }else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+//                            nPanel.getNotificationManager().notify(2, nPanel.getNotificationBuilder().build());
+//                        }
+                        // TODO: 8/23/2019 https://stackoverflow.com/questions/22789588/how-to-update-notification-with-remoteviews see warning about memory leak
+                        nPanel.getNotificationManager().notify(2, nPanel.getNotificationBuilder().build());
+                        //            nManager.notify(2, nBuilder.build());
+                    }
+                }
             }
         });
 
@@ -429,14 +449,25 @@ private long pauseOffset = 0;
     public static class NotificationPanel {
 
         private Context parent;
+        private RemoteViews remoteView;
+
         private NotificationManager nManager;
         private NotificationCompat.Builder nBuilder;
-        private RemoteViews remoteView;
+
+        public NotificationCompat.Builder getNotificationBuilder() {
+            return nBuilder;
+        }
+
+        public RemoteViews getRemoteView() {
+            return remoteView;
+        }
+        public NotificationManager getNotificationManager() {
+            return nManager;
+        }
 
         public NotificationPanel(Context parent) {
             // TODO Auto-generated constructor stub
             this.parent = parent;
-            String CHANNEL_ID = "my_channel_01";
             nManager = (NotificationManager) parent.getSystemService(NOTIFICATION_SERVICE);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -473,10 +504,13 @@ private long pauseOffset = 0;
 
         public void setListeners(RemoteViews view){
 
-            Intent intent = new Intent("stop");
-            PendingIntent pendingSwitchIntent = PendingIntent.getBroadcast(parent, 0, intent, 0);
+            Intent intentStop = new Intent(STOP_RECORDING_ACTION);
+            Intent intentPauseOrResume = new Intent(PAUSE_OR_RESUME_RECORDING_ACTION);
+            PendingIntent pendingSwitchIntentStop = PendingIntent.getBroadcast(parent, 0, intentStop, 0);
+            PendingIntent pendingSwitchIntentPauseOrResume = PendingIntent.getBroadcast(parent, 0, intentPauseOrResume, 0);
 
-            view.setOnClickPendingIntent(R.id.btn2, pendingSwitchIntent);
+            view.setOnClickPendingIntent(R.id.notification_stop_recording_button, pendingSwitchIntentStop);
+            view.setOnClickPendingIntent(R.id.notification_pause_resume_button, pendingSwitchIntentPauseOrResume);
 
 //
 //
@@ -517,11 +551,17 @@ private long pauseOffset = 0;
 
 //            Toast.makeText(context,"recieved", Toast.LENGTH_SHORT).show();
 
-            try {
-                onStopClick(null);
-            } catch (IOException e) {
-                e.printStackTrace();
+            if(intent.getAction().equals(STOP_RECORDING_ACTION)){
+                try {
+                    onStopClick(null);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
+            else if(intent.getAction().equals(PAUSE_OR_RESUME_RECORDING_ACTION)){
+                onRecordClick(null);
+            }
+
 
             //This is used to close the notification tray
             Intent it = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
