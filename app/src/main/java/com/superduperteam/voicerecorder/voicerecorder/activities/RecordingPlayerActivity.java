@@ -47,7 +47,7 @@ public class RecordingPlayerActivity extends BaseActivity {
         File file = new File(pathToFileToPlay);
 
         try {
-            this.recording = new Recording(file);
+            this.recording = new Recording(file.getName(),file, Recording.fetchBookmarks(file));
         } catch (IOException e) {
             e.printStackTrace();
         }

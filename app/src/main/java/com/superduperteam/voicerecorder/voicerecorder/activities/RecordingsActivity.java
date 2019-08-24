@@ -27,6 +27,7 @@ import android.widget.Toast;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
+import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -56,19 +57,20 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
 
-public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenuItemClickListener, MyRecyclerViewAdapter.ItemClickListener, SearchView.OnQueryTextListener {
+public class RecordingsActivity extends BaseActivity implements SearchView.OnQueryTextListener, PopupMenu.OnMenuItemClickListener{
+//public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenuItemClickListener, MyNewRecyclerViewAdapter.ItemClickListener, SearchView.OnQueryTextListener {
     private RecyclerView recyclerView;
     private List selectedItems;
-    private MyRecyclerViewAdapter adapter;
+    private GenreAdapter adapter;
     private File recordingsFolder;
     private MediaMetadataRetriever mediaMetadataRetriever;
     private EditText searchBookmarkEditText;
-    private List<Line> recordings;
+    private List<Recording> recordings;
+    MenuItem searchRecordingsMenuItem;
     private RadioButton checkedRadio;
     private File bookmarksToAddFile;
     private List<Bookmark> bookmarksToAddToExistingRecording = new ArrayList<>();
     private ConstraintLayout parentOfMenuItemClicked;
-    MenuItem searchRecordingsMenuItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,18 +84,18 @@ public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenu
         View contentView = inflater.inflate(R.layout.activity_recordings, null, false);
         mDrawer.addView(contentView, 1);
 
-        recordings = new ArrayList<>();
 
         onSharedIntent();
 
         String folderPath = Objects.requireNonNull(getExternalFilesDir(null)).getAbsolutePath();
         recordingsFolder = new File(folderPath);
+        recordings = new ArrayList<>();
         List<File> recordingsFiles = new ArrayList<>(Arrays.asList(recordingsFolder.listFiles()));
-        for (File recordingFile : recordingsFiles) {
+        for(File recordingFile : recordingsFiles ){
             try {
                 if (!recordingFile.isDirectory()) {
-                    Recording recording = new Recording(recordingFile);
-                    recordings.add(recording);
+                Recording recording = new Recording(recordingFile.getName().substring(0,recordingFile.getName().indexOf(".")), recordingFile, Recording.fetchBookmarks(recordingFile));
+                recordings.add(recording);
 //                if(recording.getBookmarksList() != null){
 //                    recordings.addAll(recording.getBookmarksList());
                 }
@@ -106,14 +108,20 @@ public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenu
         // set up the RecyclerView
         RecyclerView recyclerView = findViewById(R.id.recordingsLRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new MyRecyclerViewAdapter(this, recordings);
-        adapter.setClickListener(this);
-        recyclerView.setAdapter(adapter);
-        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(), LinearLayout.VERTICAL);
-        recyclerView.addItemDecoration(dividerItemDecoration);
+        RecyclerView.ItemAnimator animator = recyclerView.getItemAnimator();
+        if (animator instanceof DefaultItemAnimator) {
+            ((DefaultItemAnimator) animator).setSupportsChangeAnimations(false);
+        }
 
-        //   searchBookmarkEditText = findViewById(R.id.search_by_bookmark);
-        //   searchBookmarkEditText.addTextChangedListener(new TextWatcher() {
+        adapter = new GenreAdapter(this, new ArrayList<>(recordings));
+//        adapter = new MyNewRecyclerViewAdapter(this, recordings);
+//        adapter.setClickListener(this);
+        recyclerView.setAdapter(adapter);
+
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(), LinearLayout.VERTICAL);
+        recyclerView.addItemDecoration(dividerItemDecoration); // TODO: 8/12/2019 Optional - decide if its better with/without
+     //   searchBookmarkEditText = findViewById(R.id.search_by_bookmark);
+     //   searchBookmarkEditText.addTextChangedListener(new TextWatcher() {
 //            @Override
 //            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 //
@@ -244,7 +252,7 @@ public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenu
 
                             output.flush();
                         }
-                        Recording rec = new Recording(file);
+                        Recording rec = new Recording("/ReceivedRecording.m4a", file, null);
                         recordings.add(rec);
                     } catch (IOException e) {
                         Toast.makeText(this, "Error " + intent.getAction() + " " + redordingUri.toString() + " " + e.getMessage(), Toast.LENGTH_LONG).show();
@@ -254,10 +262,39 @@ public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenu
             }
         }
     }
+//                    toggleRadioButtonsVisibility(toggleRadioButtonsToVisible, recyclerView);
+
+//
+//
+//        // Saar: This is for the actual list of recordings - if user click on the vertical 3 dots.
+//        public void onRecordingClick (View view){
+//            PopupMenu popup = new PopupMenu(this, view); // view=button
+//            popup.setOnMenuItemClickListener(this);
+//            popup.inflate(R.menu.recording_clicked_menu);
+//            popup.show();
+//        }
+//        @Override
+//        public boolean onMenuItemClick (MenuItem item){
+//            switch (item.getItemId()) {
+//                case R.id.recording_clicked_delete:
+//                    Toast.makeText(this, "delete from recording row", Toast.LENGTH_LONG).show();
+//                    return true;
+//                case R.id.recording_clicked_edit:
+//                    Toast.makeText(this, "edit from recording row", Toast.LENGTH_LONG).show();
+//                    return true;
+//                case R.id.recording_clicked_share:
+//                    Toast.makeText(this, "share from recording row", Toast.LENGTH_LONG).show();
+//                    return true;
+//                default:
+//                    return false;
+//            }
+//        }
+//
+
+
 
     public void onRadaioButtonClick(View view) {
-        String recordingName = ((TextView) ((ConstraintLayout) view.getParent()).getChildAt(1)).getText().toString();
-        String recordingPath = Objects.requireNonNull(getExternalFilesDir(null)).getAbsolutePath() + '/' + recordingName;
+        String recordingName = ((TextView) ((ConstraintLayout) view.getParent()).getChildAt(1)).getText().toString() + ".m4a";
         boolean toggleRadioButtonsToVisible = false;
 
         checkedRadio = (RadioButton) view;
@@ -283,7 +320,7 @@ public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenu
         }
 
         try {
-            cmd.writeRandomMetadata(recording.getFile().getAbsolutePath(), sb.toString());
+            cmd.writeMetadata(recording.getFile().getAbsolutePath(), sb.toString());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -294,7 +331,7 @@ public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenu
         File file = new File(recordingPath);
         Recording recording = null;
 
-        for (Line rec : recordings) {
+        for (Recording rec : recordings) {
             if (rec.getFile().getAbsolutePath().equals(recordingPath)) {
                 recording = (Recording) rec;
             }
@@ -330,7 +367,7 @@ public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenu
     public void onRecordingClick(View view) {
         parentOfMenuItemClicked = (ConstraintLayout) view.getParent();
         PopupMenu popup = new PopupMenu(this, view); // view=button
-        popup.setOnMenuItemClickListener(this);
+        popup.setOnMenuItemClickListener(this::onMenuItemClick);
         popup.inflate(R.menu.recording_clicked_menu);
         popup.show();
     }
@@ -338,7 +375,7 @@ public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenu
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public boolean onMenuItemClick(MenuItem item) {
-        String recordingName = ((TextView) parentOfMenuItemClicked.getChildAt(1)).getText().toString();
+        String recordingName = ((TextView) parentOfMenuItemClicked.getChildAt(1)).getText().toString() + ".m4a";
         String fileName = Objects.requireNonNull(getExternalFilesDir(null)).getAbsolutePath() + '/' + recordingName;
         String bookmarkDirectoryName = Objects.requireNonNull(getExternalFilesDir(null)).getAbsolutePath() + "/bookmarks";
         File file = new File(fileName);
@@ -387,7 +424,7 @@ public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenu
 
                 while (scr.hasNextLine()) {
                     currLine = scr.nextLine();
-                    Bookmark currBookmark = Bookmark.parseBookmark(currLine);
+                    Bookmark currBookmark = Bookmark.parseBookmark(currLine, file);
 
                     if (currBookmark != null) {
                         bookmarksList.add(currBookmark);
@@ -465,11 +502,10 @@ public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenu
     }
 
     // Saar: This is for Sort button
-    public void onSortClick(MenuItem item) {
+    public void onSortClick (MenuItem item){
         alertSortElements();
     }
-
-    public void alertSortElements() {
+    public void alertSortElements () {
 
         /*
          * Inflate the XML view. activity_main is in
@@ -513,18 +549,18 @@ public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenu
                 }).show();
     }
 
-    @Override
-    public void onItemClick(View view, int position) {
-        Toast.makeText(this, "You clicked " + adapter.getItem(position) + " on row number " + position, Toast.LENGTH_SHORT).show();
-    }
-
-    public void onPlayClick(View view, int position) {
-    }
+//        @Override
+//        public void onItemClick (View view,int position){
+//            Toast.makeText(this, "You clicked " + adapter.getItem(position) + " on row number " + position, Toast.LENGTH_SHORT).show();
+//        }
+//
+//        public void onPlayClick (View view,int position){
+//        }
 
 
     // Saar: This is to make the buttons in the top to show : search and sort
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu (Menu menu){
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_recordings, menu);
         searchRecordingsMenuItem = menu.findItem(R.id.recordings_search);
@@ -546,23 +582,55 @@ public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenu
         return false;
     }
 
+//    @Override
+//    public boolean onQueryTextChange(String newText) {
+//        String userInput = newText.toLowerCase();
+//        List<Recording> newList = new ArrayList<>();
+//
+//        for(Recording recording: recordings){
+//            if(recording.getTitle().toLowerCase().contains(userInput)){
+//                newList.add(recording);
+//            }
+//            else{
+//                for(Bookmark bookmark : recording.getBookmarksList()){
+//                    if(bookmark.getTitle().toLowerCase().contains(userInput)) {
+//                        newList.add(recording);
+//                        break;
+//                    }
+//                }
+//            }
+//        }
+//
+//        adapter.updateList(newList);
+//        return true;
+//    }
+
     @Override
     public boolean onQueryTextChange(String newText) {
         String userInput = newText.toLowerCase();
-        List<Line> newList = new ArrayList<>();
+        List<Recording> newList = new ArrayList<>();
 
-        for (Line line : recordings) {
-            if (line.getName().toLowerCase().contains(userInput)) {
-                newList.add(line);
-            } else {
-                if (line instanceof Recording) {  // TODO: 7/23/2019 change this
-                    Recording recording = (Recording) line;
-                    for (Bookmark bookmark : recording.getBookmarksList()) {
-                        if (bookmark.getName().toLowerCase().contains(userInput)) {
-                            newList.add(line);
-                            break;
-                        }
+        for(Recording recording: recordings){
+            if(recording.getTitle().toLowerCase().contains(userInput)){
+                recording.getBookmarksList().forEach(Bookmark::removeTheHighlightFromText);
+                newList.add(recording);
+            }
+            else{
+                // Saar: If we are here, it means the recording is not matching the userInput.
+                // Now we want to check if it has matching bookmarks - if so, we want to mark these bookmarks.
+                int matchingBookmarksCount = 0;
+
+                for(Bookmark bookmark : recording.getBookmarksList()){
+                    if(bookmark.getTitle().toString().toLowerCase().contains(userInput)) {
+                        int start = bookmark.getTitle().toString().toLowerCase().indexOf(userInput);
+                        int end = start + userInput.length();
+                        bookmark.highlightText(start, end);
+                        matchingBookmarksCount++;
                     }
+                }
+
+                if(matchingBookmarksCount > 0){
+                    newList.add(recording);
                 }
             }
         }
@@ -570,6 +638,46 @@ public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenu
         adapter.updateList(newList);
         return true;
     }
+}
+
+//    @Override
+//    public boolean onQueryTextChange(String newText) {
+//        String userInput = newText.toLowerCase();
+//        List<Recording> newList = new ArrayList<>();
+//
+//        for(Recording recording: recordings){
+//            if(recording.getTitle().toLowerCase().contains(userInput)){
+//                recording.setShouldExpand(false);
+//                newList.add(recording);
+//            }
+//            else{
+//                // Saar: If we are here, it means the recording is not matching the userInput.
+//                // Now we want to check if it has matching bookmarks - if so, we want to include only these bookmarks.
+//
+//                List<Bookmark> matchingBookmarks = new ArrayList<>();
+//
+//                for(Bookmark bookmark : recording.getBookmarksList()){
+//                    if(bookmark.getTitle().toLowerCase().contains(userInput)) {
+//                        matchingBookmarks.add(bookmark);
+//                        break;
+//                    }
+//                }
+//
+//                if(matchingBookmarks.size() != 0){
+//                    try {
+//                        Recording newRecording = new Recording(recording.getTitle(), recording.getFile(), matchingBookmarks);
+//                        newRecording.setShouldExpand(true);
+//                        newList.add(newRecording);
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//            }
+//        }
+//
+//        adapter.updateList(newList);
+//        return true;
+//    }
 
 
 //    public void alertSingleChoiceItems(){
@@ -636,4 +744,4 @@ public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenu
 //    public void onEditClick(MenuItem item) {
 //        Toast.makeText(getApplicationContext(),"edit", Toast.LENGTH_SHORT).show();
 //    }
-}
+

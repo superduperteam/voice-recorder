@@ -1,16 +1,25 @@
 package com.superduperteam.voicerecorder.voicerecorder.activities;
 
 import android.Manifest;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
+import android.os.Build;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.SystemClock;
 
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
 
 import android.util.Log;
 import android.view.Gravity;
@@ -22,8 +31,12 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+import android.widget.RemoteViews;
+import android.widget.TextView;
+
 import com.superduperteam.voicerecorder.voicerecorder.BaseActivity;
 import com.superduperteam.voicerecorder.voicerecorder.R;
+import com.superduperteam.voicerecorder.voicerecorder.VisualizerView;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,30 +44,43 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+// TODO: 8/20/2019 saar: probably need to implement onClose (user might close the app while recording)
 public class MainActivity extends BaseActivity {
 
+    NotificationPanel nPanel;
+
+
+    ActionReceiver actionReceiver;
    // private DrawerLayout drawerLayout;
     private Chronometer chronometer;
-    //private boolean isStart;
-    private boolean isRecording = false; // is actively recording something?
+    private volatile boolean isRecording = false; // is actively recording something?
     private String lastRecordingPath = null;
     private String outputFormat = ".m4a"; // TODO: 7/18/2019  might wantto change to ".m4a"
-    private int recordingNum = 0;
     private List<Bookmark> bookmarksList;
     private ImageButton bookmarkImageButton;
     private EditText bookmarkNameEditText;
     private View addBookmarkView;
     private PopupWindow addBookmarkPopupWindow;
+    private static final String STOP_RECORDING_ACTION = "stop";
+    private static final String PAUSE_OR_RESUME_RECORDING_ACTION = "pauseOrResume";
     //voice recorder
     private static final String LOG_TAG = "AudioRecordTest";
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
-    private static String defaultFileName = "Recording";
+    private static final String CHANNEL_ID = "my_channel_01";
+
 
     private MediaRecorder recorder = null;
+//    private RecordingSampler recordingSampler;
+
+
+    private Handler handler; // Handler for updating the visualizer
+    com.superduperteam.voicerecorder.voicerecorder.VisualizerView visualizerView;
+    public static final int REPEAT_INTERVAL = 40;
+
 
     // Requesting permission to RECORD_AUDIO
     private boolean permissionToRecordAccepted = false;
-    private String[] permissions = {Manifest.permission.RECORD_AUDIO, Manifest.permission_group.SMS};
+    private String[] permissions = {Manifest.permission.RECORD_AUDIO};
 
    // boolean mStartRecording = true;
 
@@ -67,7 +93,6 @@ public class MainActivity extends BaseActivity {
 
         //inflate your activity layout here!
         View contentView = inflater.inflate(R.layout.activity_main, null, false);
-
         mDrawer.addView(contentView, 1);
 
         // Record to the external cache directory for visibility
@@ -86,18 +111,42 @@ public class MainActivity extends BaseActivity {
 
         isExternalStorageWritable();
         ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
-        ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
-
         chronometerInit();
+
+
+        visualizerView = (VisualizerView) findViewById(R.id.visualizer);
+        handler = new Handler();
+
+//        RecordingSampler recordingSampler = new RecordingSampler();
+////        recordingSampler.setVolumeListener(this);  // for custom implements
+//        recordingSampler.setSamplingInterval(100); // voice sampling interval
+//        recordingSampler.link(VisualizerView);     // link to visualizer
+//
+//        recordingSampler.startRecording();
+
+
+        actionReceiver = new ActionReceiver();
+        registerReceiver(actionReceiver, new IntentFilter(STOP_RECORDING_ACTION));
+        registerReceiver(actionReceiver, new IntentFilter(PAUSE_OR_RESUME_RECORDING_ACTION));
+
     }
 
-//    private String getCurrentFileName() {
-//        isExternalStorageWritable();
-//        fileName = Objects.requireNonNull(getExternalFilesDir(null)).getAbsolutePath();
-//        fileName += "/recording" + recordingNum + outputFormat;
-//        Log.i(LOG_TAG,  "filePath for recording: " + fileName);
-//
-//        return fileName;
+    // updates the visualizer every 50 milliseconds
+    Runnable updateVisualizer = new Runnable() {
+        @Override
+        public void run() {
+            if (isRecording) // if we are already recording
+            {
+                // get the current amplitude
+                int x = recorder.getMaxAmplitude();
+                visualizerView.addAmplitude(x); // update the VisualizeView
+                visualizerView.invalidate(); // refresh the VisualizerView
+
+                // update in 40 milliseconds
+                handler.postDelayed(this, REPEAT_INTERVAL);
+            }
+        }
+    };
 
     //Todo: problem: if we allow different audio formats: user can have recording1.3gp and recording1.mp3 for example.
     private String getCurrentFilePath() {
@@ -128,10 +177,45 @@ public class MainActivity extends BaseActivity {
         chronometer = findViewById(R.id.chronometer);
 
         chronometer.setBase(SystemClock.elapsedRealtime()); // new
+
+//        chronometer.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
+//            @Override
+//            public void onChronometerTick(Chronometer cArg) {
+//                long time = SystemClock.elapsedRealtime() - cArg.getBase();
+//                int h   = (int)(time /3600000);
+//                int m = (int)(time - h*3600000)/60000;
+//                int s= (int)(time - h*3600000- m*60000)/1000 ;
+//                String hh = h < 10 ? "0"+h: h+"";
+//                String mm = m < 10 ? "0"+m: m+"";
+//                String ss = s < 10 ? "0"+s: s+"";
+//                cArg.setText(hh+":"+mm+":"+ss);
+//            }
+//        });
+
         chronometer.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
             @Override
             public void onChronometerTick(Chronometer chronometerChanged) {
                 chronometer = chronometerChanged;
+                TextView time = findViewById(R.id.notification_recording_time);
+                if(time != null){
+                    time.setText(chronometerChanged.getText());
+                }
+
+                if(nPanel != null){
+                    if(nPanel.getRemoteView() != null){
+                        nPanel.getRemoteView().setTextViewText(R.id.notification_recording_time, chronometerChanged.getText());
+
+                        // update the notification
+//                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
+//                            nPanel.getNotificationManager().notify(2, );
+//                        }else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+//                            nPanel.getNotificationManager().notify(2, nPanel.getNotificationBuilder().build());
+//                        }
+                        // TODO: 8/23/2019 https://stackoverflow.com/questions/22789588/how-to-update-notification-with-remoteviews see warning about memory leak
+                        nPanel.getNotificationManager().notify(2, nPanel.getNotificationBuilder().build());
+                        //            nManager.notify(2, nBuilder.build());
+                    }
+                }
             }
         });
 
@@ -148,10 +232,13 @@ public class MainActivity extends BaseActivity {
 
         if (!isRecording) {
             //startStopWatch(isFirstStart);
-            findViewById(R.id.record_button).setBackgroundResource(R.drawable.ic_pressed_record_button);
+            findViewById(R.id.record_button).setBackgroundResource(R.drawable.ic_pause_circle_filled_black_24dp);
 
             startStopWatch();
             startRecording(isRunning);
+            nPanel = new NotificationPanel(this);
+//            notificationTest();
+
             isRunning = true;
         } else {
             findViewById(R.id.record_button).setBackgroundResource(R.drawable.ic_record_button);
@@ -162,18 +249,32 @@ public class MainActivity extends BaseActivity {
         isRecording = !isRecording;
     }
 
+    @Override
+    public void onDestroy() {
+
+        try{
+            if(actionReceiver!=null)
+                unregisterReceiver(actionReceiver);
+
+        }catch(Exception e){}
+
+        super.onDestroy();
+    }
+
     public void onStopClick(View view) throws IOException {
         if(isRunning){
             resetStopWatch();
             findViewById(R.id.record_button).setBackgroundResource(R.drawable.ic_record_button);
             stopRecording();
+            if(nPanel != null){
+                nPanel.notificationCancel();
+            }
             isRunning = false;
             isRecording = false;
             //stopStopWatch();
             //    stopRecording();
         }
     }
-
 //    private void stopStopWatch() {
 //        chronometer.setBase(SystemClock.elapsedRealtime());
 //        chronometer.stop();
@@ -218,8 +319,10 @@ private long pauseOffset = 0;
         recorder.stop();
         recorder.release();
         recorder = null;
-        recordingNum++;
 
+        handler.removeCallbacks(updateVisualizer);
+        visualizerView.clear();
+        visualizerView.invalidate();
         addBookmarksToMetadata();
         startPlaying();
     }
@@ -234,6 +337,7 @@ private long pauseOffset = 0;
             player.setDataSource(lastRecordingPath);
             player.prepare();
             player.start();
+            handler.post(updateVisualizer);
             System.out.print("duration: ");
             System.out.println(player.getDuration());
         } catch (IOException e) {
@@ -262,6 +366,7 @@ private long pauseOffset = 0;
         }
 
         recorder.start();
+        handler.post(updateVisualizer);
     }
 
     private void startRecording(boolean isRunning) {
@@ -270,16 +375,8 @@ private long pauseOffset = 0;
         }
         else{
             recorder.resume();
+            handler.post(updateVisualizer);
         }
-    }
-
-    public void onSendSmsClick(View view) {
-//        Intent sendIntent = new Intent();
-//        sendIntent.setAction(Intent.ACTION_SEND);
-//        sendIntent.putExtra(Intent.EXTRA_TEXT, "This is my text to send.");
-//        sendIntent.setType("text/plain");
-//        startActivity(sendIntent);
-//
     }
 
     public void onButtonShowPopupWindowClick(View view) {
@@ -337,7 +434,7 @@ private long pauseOffset = 0;
             sb.append(bookmark.toString()).append(System.lineSeparator());
         }
 
-        cmd.writeRandomMetadata(lastRecordingPath, sb.toString());
+        cmd.writeMetadata(lastRecordingPath, sb.toString());
     }
 
     public void onAddBookmarkClick(View view) {
@@ -349,4 +446,173 @@ private long pauseOffset = 0;
 
         addBookmarkPopupWindow.dismiss();
     }
+
+    // ********************************* Inner Class from here *********************************
+    public static class NotificationPanel {
+
+        private Context parent;
+        private RemoteViews remoteView;
+
+        private NotificationManager nManager;
+        private NotificationCompat.Builder nBuilder;
+
+        public NotificationCompat.Builder getNotificationBuilder() {
+            return nBuilder;
+        }
+
+        public RemoteViews getRemoteView() {
+            return remoteView;
+        }
+        public NotificationManager getNotificationManager() {
+            return nManager;
+        }
+
+        public NotificationPanel(Context parent) {
+            // TODO Auto-generated constructor stub
+            this.parent = parent;
+            nManager = (NotificationManager) parent.getSystemService(NOTIFICATION_SERVICE);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                CharSequence name = parent.getString(R.string.app_name);
+                int importance = NotificationManager.IMPORTANCE_LOW;
+                NotificationChannel mChannel = new NotificationChannel(CHANNEL_ID, name, importance);
+                mChannel.setSound(null, null);
+                assert nManager != null;
+                nManager.createNotificationChannel(mChannel);
+            }
+
+//            Notification.Builder notiBuilder = new Notification.Builder(parent)
+//                    .setSmallIcon(R.drawable.ic_record_button)
+//                    .setOngoing(true);
+
+            nBuilder = new NotificationCompat.Builder(parent)
+                    .setContentTitle("Parking Meter")
+                    .setSmallIcon(R.drawable.ic_record_button)
+                    .setChannelId(CHANNEL_ID)
+                    .setTicker(null)
+                    .setSound(null)
+                    .setOngoing(true);
+
+
+            remoteView = new RemoteViews(parent.getPackageName(), R.layout.recording_controls_in_notification_area);
+
+            //set the button listeners
+            setListeners(remoteView);
+            nBuilder.setContent(remoteView);
+//            notiBuilder.setCustomContentView(remoteView);
+
+            nManager.notify(2, nBuilder.build());
+        }
+
+        public void setListeners(RemoteViews view){
+
+            Intent intentStop = new Intent(STOP_RECORDING_ACTION);
+            Intent intentPauseOrResume = new Intent(PAUSE_OR_RESUME_RECORDING_ACTION);
+            PendingIntent pendingSwitchIntentStop = PendingIntent.getBroadcast(parent, 0, intentStop, 0);
+            PendingIntent pendingSwitchIntentPauseOrResume = PendingIntent.getBroadcast(parent, 0, intentPauseOrResume, 0);
+
+            view.setOnClickPendingIntent(R.id.notification_stop_recording_button, pendingSwitchIntentStop);
+            view.setOnClickPendingIntent(R.id.notification_pause_resume_button, pendingSwitchIntentPauseOrResume);
+
+//
+//
+//
+//            //listener 1
+//            Intent volume = new Intent("volume");
+//            volume.putExtra("DO", "volume");
+//            PendingIntent btn1 = PendingIntent.getActivity(parent, 0, volume, 0);
+//            view.setOnClickPendingIntent(R.id.btn1, btn1);
+//
+//            //listener 2
+//            Intent stop = new Intent("stop");
+//            stop.putExtra("DO", "stop");
+//            PendingIntent btn2 = PendingIntent.getActivity(parent, 1, stop, 0);
+//            view.setOnClickPendingIntent(R.id.btn2, btn2);
+        }
+
+        public void notificationCancel() {
+            nManager.cancel(2);
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+    public class ActionReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+//            Toast.makeText(context,"recieved", Toast.LENGTH_SHORT).show();
+
+            if(intent.getAction().equals(STOP_RECORDING_ACTION)){
+                try {
+                    onStopClick(null);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            else if(intent.getAction().equals(PAUSE_OR_RESUME_RECORDING_ACTION)){
+                onRecordClick(null);
+            }
+
+
+            //This is used to close the notification tray
+            Intent it = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+            context.sendBroadcast(it);
+        }
+    }
+
+
+
+
+
+    // ********************************* Inner Class from here *********************************
+//    public static class NotificationReturnSlot extends IntentService {
+//        /**
+//         * Creates an IntentService.  Invoked by your subclass's constructor.
+//         *
+//         * @param name Used to name the worker thread, important only for debugging.
+//         */
+//        public NotificationReturnSlot(String name) {
+//            super(name);
+//        }
+//
+//    //    @Override
+//    //    protected void onCreate(Bundle savedInstanceState) {
+//    //        // TODO Auto-generated method stub
+//    //        super.onCreate(savedInstanceState);
+//    //        String action = (String) getIntent().getExtras().get("DO");
+//    //        if (action.equals("volume")) {
+//    //            Log.i("NotificationReturnSlot", "volume");
+//    //            //Your code
+//    //        } else if (action.equals("stopNotification")) {
+//    //            //Your code
+//    //
+//    //            Log.i("NotificationReturnSlot", "stopNotification");
+//    //        }
+//    //        finish();
+//    //    }
+//
+//        @Override
+//        protected void onHandleIntent(@Nullable Intent intent) {
+//            String action = (String) intent.getExtras().get("DO");
+//            if (action.equals("volume")) {
+//                Log.i("NotificationReturnSlot", "volume");
+//                //Your code
+//            } else if (action.equals("stopNotification")) {
+//                //Your code
+//
+//                Log.i("NotificationReturnSlot", "stopNotification");
+//            }
+//        }
+//    }
 }

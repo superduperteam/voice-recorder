@@ -2,15 +2,12 @@
 //
 //import android.content.Context;
 //import android.content.Intent;
-//import android.graphics.Color;
 //import android.media.MediaMetadataRetriever;
 //import android.media.MediaPlayer;
-//import android.provider.MediaStore;
 //import android.util.Log;
 //import android.view.LayoutInflater;
 //import android.view.View;
 //import android.view.ViewGroup;
-//import android.view.animation.Animation;
 //import android.widget.ImageButton;
 //import android.widget.TextView;
 //
@@ -18,11 +15,13 @@
 //
 //import com.superduperteam.voicerecorder.voicerecorder.R;
 //import com.thoughtbot.expandablerecyclerview.ExpandableRecyclerViewAdapter;
+//import com.thoughtbot.expandablerecyclerview.models.ExpandableGroup;
+//import com.thoughtbot.expandablerecyclerview.models.ExpandableList;
+//import com.thoughtbot.expandablerecyclerview.models.ExpandableListPosition;
 //import com.thoughtbot.expandablerecyclerview.viewholders.GroupViewHolder;
 //
 //import java.io.File;
 //import java.io.IOException;
-//import java.util.ArrayList;
 //import java.util.List;
 //import java.util.concurrent.TimeUnit;
 //
@@ -31,12 +30,10 @@
 //// https://stackoverflow.com/questions/40584424/simple-android-recyclerview-example
 ////RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder>
 ////RecordingViewHolder
-//public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder> {
-//
+//public class MyNewRecyclerViewAdapter extends ExpandableRecyclerViewAdapter<MyNewRecyclerViewAdapter.RecordingViewHolder, BookmarkViewHolder>{
 //    private static final String LOG_TAG = "AudioRecordTest";
-//    private List<Line> mRecordings;
+//    private ExpandableList recordings;
 //    Context context;
-//    private LayoutInflater mInflater;
 //    private ItemClickListener mClickListener;
 //    private MediaMetadataRetriever mmr;
 //    private MediaPlayer player = new MediaPlayer();
@@ -45,39 +42,48 @@
 //    private ImageButton lastPlayed;
 //
 //    // data is passed into the constructor
-//    MyRecyclerViewAdapter(Context context, List<Line> recordings) {
+//    MyNewRecyclerViewAdapter(Context context, List<Recording> recordings) {
+//        super(recordings);
 //        this.context = context;
-//        this.mInflater = LayoutInflater.from(context);
-//        this.mRecordings = recordings;
 //        mmr = new MediaMetadataRetriever(); //used to get duration of recording. much lighter than MediaPlayer
 //    }
 //
 //    // inflates the row layout from xml when needed
 //    @Override
-//    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-//        View view = mInflater.inflate(R.layout.recording_row, parent, false);
-//        return new ViewHolder(view);
+//    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+//        switch (viewType) {
+//            case ExpandableListPosition.GROUP:
+//                RecordingViewHolder recordingViewHolder = onCreateGroupViewHolder(parent, viewType);
+//                recordingViewHolder.setOnGroupClickListener(this);
+////                recordingViewHolder.setOnBookmarksClickListener(this);
+//                return recordingViewHolder;
+//            case ExpandableListPosition.CHILD:
+//                BookmarkViewHolder bookmarkViewHolder = onCreateChildViewHolder(parent, viewType);
+//                return bookmarkViewHolder;
+//            default:
+//                throw new IllegalArgumentException("viewType is not valid");
+//        }
 //    }
 //
-//    // binds the data to the TextView in each row
-//    @Override
-//    public void onBindViewHolder(ViewHolder holder, int position) {
-//        String recordingName = mRecordings.get(position).getName();
-//        String recordingDuration;
-//        long recordingDurationMilliseconds;
-//        String recordingDate;
-//
-//        mmr.setDataSource(mRecordings.get(position).getFile().getPath());
-//        recordingDuration = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
-//        recordingDurationMilliseconds = Long.parseLong(recordingDuration);
-//        recordingDuration = convertMilliSecondsToRecordingTime(recordingDurationMilliseconds);
-//        recordingDate = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DATE);
-//        recordingDate = extractDateFromMetaDataDate(recordingDate);
-//
-//        holder.recordingDate.setText(recordingDate);
-//        holder.recordingDurationTextView.setText(recordingDuration);
-//        holder.recordingNameTextView.setText(recordingName);
-//    }
+////    // binds the data to the TextView in each row
+////    @Override
+////    public void onBindViewHolder(RecordingViewHolder holder, int position) {
+////        String recordingName = mRecordings.get(position).getName();
+////        String recordingDuration;
+////        long recordingDurationMilliseconds;
+////        String recordingDate;
+////
+////        mmr.setDataSource(mRecordings.get(position).getFile().getPath());
+////        recordingDuration = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+////        recordingDurationMilliseconds = Long.parseLong(recordingDuration);
+////        recordingDuration = convertMilliSecondsToRecordingTime(recordingDurationMilliseconds);
+////        recordingDate = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DATE);
+////        recordingDate = extractDateFromMetaDataDate(recordingDate);
+////
+////        holder.recordingDate.setText(recordingDate);
+////        holder.recordingDurationTextView.setText(recordingDuration);
+////        holder.recordingNameTextView.setText(recordingName);
+////    }
 //
 //    private final static int YEAR_START_INDEX = 0;
 //    private final static int YEAR_END_INDEX = 4;
@@ -124,33 +130,79 @@
 //    // total number of rows
 //    @Override
 //    public int getItemCount() {
-//        return mRecordings.size();
+//        return expandableList.groups.size();
 //    }
 //
+//    @Override
+//    public RecordingViewHolder onCreateGroupViewHolder(ViewGroup parent, int viewType) {
+//        View view = LayoutInflater.from(parent.getContext())
+//                .inflate(R.layout.recording_row, parent, false);
+//        return new RecordingViewHolder(view);
+//    }
+//
+//    @Override
+//    public BookmarkViewHolder onCreateChildViewHolder(ViewGroup parent, int viewType) {
+//        View view = LayoutInflater.from(parent.getContext())
+//                .inflate(R.layout.bookmark_row, parent, false);
+//        return new BookmarkViewHolder(view);
+//    }
+//
+//    @Override
+//    public void onBindChildViewHolder(BookmarkViewHolder holder, int flatPosition, ExpandableGroup group, int childIndex) {
+//        final Bookmark bookmark = ((Recording) group).getItems().get(childIndex);
+//        holder.setBookmarkText(bookmark.getTitle());
+//    }
+//
+//    @Override
+//    public void onBindGroupViewHolder(RecordingViewHolder holder, int flatPosition, ExpandableGroup group) {
+//        List<Recording> mRecordings = (List<Recording>)expandableList.groups;
+//        String recordingName = mRecordings.get(flatPosition).getTitle();
+//        String recordingDuration;
+//        long recordingDurationMilliseconds;
+//        String recordingDate;
+//
+//        mmr.setDataSource(mRecordings.get(flatPosition).getFile().getPath());
+//        recordingDuration = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+//        recordingDurationMilliseconds = Long.parseLong(recordingDuration);
+//        recordingDuration = convertMilliSecondsToRecordingTime(recordingDurationMilliseconds);
+//        recordingDate = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DATE);
+//        recordingDate = extractDateFromMetaDataDate(recordingDate);
+//
+//        holder.recordingDate.setText(recordingDate);
+//        holder.recordingDurationTextView.setText(recordingDuration);
+//        holder.recordingNameTextView.setText(recordingName);
+//    }
+//
+////    @Override
+////    public void OnBookmarksClick(int flatpos) {
+////        super.toggleGroup(flatpos);
+////    }
+//
+//
 //    // stores and recycles views as they are scrolled off screen
-//    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+//    public class RecordingViewHolder extends GroupViewHolder implements View.OnClickListener{
 //        TextView recordingNameTextView;
 //        TextView recordingDurationTextView;
 //        TextView recordingDate;
 //        ImageButton playButton;
+//        ImageButton bookmarksButton;
 //
-//        ViewHolder(View itemView) {
+//        public RecordingViewHolder(View itemView) {
 //            super(itemView);
 //            recordingNameTextView = itemView.findViewById(R.id.recordingTitle);
 //            recordingDurationTextView = itemView.findViewById(R.id.recordingDuration);
 //            recordingDate = itemView.findViewById(R.id.recordingDate);
 //            playButton = itemView.findViewById(R.id.recordingsPlayImagePlace);
+//            bookmarksButton = itemView.findViewById(R.id.recordingBookmarksPlace);
+//            bookmarksButton.setOnClickListener(this);
 //
-//            // Saar: moved this into: playButton.setOnClickListener(..} below, to make pause symbol return to play on finish.
-////            player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-////                @Override
-////                public void onCompletion(MediaPlayer mediaPlayer) {
-////                    mediaPlayer.reset();
-////                    recordingToResumePosition = -1;
-////                    shouldSetDataSource = true;
-////                    playButton.setBackgroundResource(R.drawable.ic_play_arrow_triangle_alt1);
-////                }
-////            });
+//            bookmarksButton.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                    int position = getAdapterPosition();
+//                    toggleGroup(position); // TODO: 8/11/2019
+//                }
+//            });
 //
 //            playButton.setOnClickListener(new View.OnClickListener() {
 //                @Override
@@ -203,26 +255,44 @@
 //            itemView.setOnClickListener(this);
 //        }
 //
+//
+//
 //        @Override
 //        public void onClick(View view) {
-//           // if (mClickListener != null) mClickListener.onItemClick(view, getAdapterPosition());
-//            int position = getAdapterPosition();
-//            File fileToPlay = getItem(position).getFile();
+//            // if (mClickListener != null) mClickListener.onItemClick(view, getAdapterPosition());
+////            if(view instanceof ImageButton){
+////                if(onBookmarksClickListener != null){
+////                    onBookmarksClickListener.OnBookmarksClick(getAdapterPosition());
+////                }
+////            }
+////            else{
+//                int position = getAdapterPosition();
+//                File fileToPlay = getItem(position).getFile();
 //
-//            Intent intent = new Intent(context, RecordingPlayerActivity.class);
-//            intent.putExtra("fileToPlayPath", fileToPlay.getAbsolutePath());
-//            context.startActivity(intent);
+//                Intent intent = new Intent(context, RecordingPlayerActivity.class);
+//                intent.putExtra("fileToPlayPath", fileToPlay.getAbsolutePath());
+//                context.startActivity(intent);
+//         //   }
 //        }
+//
+////        public void setOnBookmarksClickListener(OnBookmarksClickListener onBookmarksClickListener) {
+////            this.onBookmarksClickListener = onBookmarksClickListener;
+////        }
+//
+////        public void setRecordingTitle(ExpandableGroup recording) {
+////            recording.setText(recording.getTitle());
+////        }
 //    }
 //
-//    public void updateList(List<Line> newList){
-//        mRecordings = new ArrayList<>();
-//        mRecordings.addAll(newList);
+//    public void updateList(List<Recording> newList){
+//        this.expandableList = new ExpandableList(newList);
 //        notifyDataSetChanged();
 //    }
 //
 //    // convenience method for getting data at click position
-//    Line getItem(int id) {
+//    Recording getItem(int id) {
+//
+//        List<Recording> mRecordings = (List<Recording>) expandableList.groups;
 //        return mRecordings.get(id);
 //    }
 //
