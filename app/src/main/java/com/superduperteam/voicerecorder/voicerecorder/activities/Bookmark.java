@@ -2,6 +2,9 @@ package com.superduperteam.voicerecorder.voicerecorder.activities;
 
 import androidx.annotation.NonNull;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.File;
 
 public class Bookmark implements Line {
@@ -21,6 +24,21 @@ public class Bookmark implements Line {
         this.timestamp = timestamp;
         this.text = text;
         this.recording = recording;
+    }
+
+
+    public Bookmark(String JSONString) {
+        JSONObject myJson = null;
+        try {
+            myJson = new JSONObject(JSONString);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        long timestamp = myJson.optLong("timestamp");
+        String text = myJson.optString("text");
+
+        this.timestamp = timestamp;
+        this.text = text;
     }
 
     public Long getTimestamp() {
@@ -69,5 +87,18 @@ public class Bookmark implements Line {
         }
 
         return null;
+    }
+
+    public String toJSON() {
+        JSONObject jsonObject= new JSONObject();
+        try {
+            jsonObject.put("timestamp", timestamp);
+            jsonObject.put("text", text);
+
+            return jsonObject.toString();
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return "";
+        }
     }
 }

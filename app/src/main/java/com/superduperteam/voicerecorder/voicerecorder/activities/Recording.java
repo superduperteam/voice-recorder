@@ -44,6 +44,10 @@ public class Recording implements Line {
         }
     }
 
+    public void addBookmarks(List<Bookmark> bookmarksToAdd) {
+        bookmarksList.addAll(bookmarksToAdd);
+    }
+
     @Override
     public String getName() {
         return file.getName();

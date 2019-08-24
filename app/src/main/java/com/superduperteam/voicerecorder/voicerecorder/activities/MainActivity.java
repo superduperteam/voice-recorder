@@ -2,8 +2,10 @@ package com.superduperteam.voicerecorder.voicerecorder.activities;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.SystemClock;
@@ -20,7 +22,6 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
-
 import com.superduperteam.voicerecorder.voicerecorder.BaseActivity;
 import com.superduperteam.voicerecorder.voicerecorder.R;
 
@@ -53,7 +54,7 @@ public class MainActivity extends BaseActivity {
 
     // Requesting permission to RECORD_AUDIO
     private boolean permissionToRecordAccepted = false;
-    private String[] permissions = {Manifest.permission.RECORD_AUDIO};
+    private String[] permissions = {Manifest.permission.RECORD_AUDIO, Manifest.permission_group.SMS};
 
    // boolean mStartRecording = true;
 
@@ -85,6 +86,8 @@ public class MainActivity extends BaseActivity {
 
         isExternalStorageWritable();
         ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
+        ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
+
         chronometerInit();
     }
 
@@ -268,6 +271,15 @@ private long pauseOffset = 0;
         else{
             recorder.resume();
         }
+    }
+
+    public void onSendSmsClick(View view) {
+//        Intent sendIntent = new Intent();
+//        sendIntent.setAction(Intent.ACTION_SEND);
+//        sendIntent.putExtra(Intent.EXTRA_TEXT, "This is my text to send.");
+//        sendIntent.setType("text/plain");
+//        startActivity(sendIntent);
+//
     }
 
     public void onButtonShowPopupWindowClick(View view) {
