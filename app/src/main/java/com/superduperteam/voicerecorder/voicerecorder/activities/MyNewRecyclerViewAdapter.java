@@ -28,7 +28,7 @@
 //
 //// Saar: took this from:
 //// https://stackoverflow.com/questions/40584424/simple-android-recyclerview-example
-////RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder>
+////RecyclerView.Adapter<BookmarksRecyclerViewAdapter.ViewHolder>
 ////RecordingViewHolder
 //public class MyNewRecyclerViewAdapter extends ExpandableRecyclerViewAdapter<MyNewRecyclerViewAdapter.RecordingViewHolder, BookmarkViewHolder>{
 //    private static final String LOG_TAG = "AudioRecordTest";

@@ -149,7 +149,7 @@ public class RecordingsActivity extends BaseActivity implements SearchView.OnQue
 //                    return remove;
 //                });
 //
-//                adapter = new MyRecyclerViewAdapter(getApplicationContext(), recordings);
+//                adapter = new BookmarksRecyclerViewAdapter(getApplicationContext(), recordings);
 //
 //                recyclerView.swapAdapter(adapter, true);
 //                adapter.notifyDataSetChanged();

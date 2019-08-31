@@ -79,8 +79,8 @@
 
         <ImageButton
             android:id="@+id/record_button"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
             android:layout_alignParentTop="false"
             android:layout_alignParentBottom="false"
             android:layout_centerHorizontal="true"
@@ -89,28 +89,29 @@
             android:onClick="onRecordClick" />
 
         <ImageButton
+            android:id="@+id/bookmark_image_button"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="62dp"
+            android:layout_marginBottom="2dp"
+            android:layout_toRightOf="@id/record_button"
+            android:background="@drawable/ic_bookmark"
+            android:onClick="onBookmarkClick" />
+
+        <ImageButton
             android:id="@+id/stop_button"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
             android:layout_alignParentTop="false"
             android:layout_alignParentBottom="false"
             android:layout_marginTop="0dp"
-            android:layout_marginRight="35dp"
+            android:layout_marginRight="57dp"
             android:layout_marginBottom="12dp"
             android:layout_toLeftOf="@id/record_button"
             android:background="@drawable/ic_stop"
             android:onClick="onStopClick" />
 
-        <ImageButton
-            android:id="@+id/bookmark_image_button"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="60dp"
-            android:layout_marginBottom="2dp"
-            android:layout_toRightOf="@id/record_button"
-            android:background="@drawable/ic_bookmark"
-            android:onClick="onBookmarkClick" />
     </RelativeLayout>
 
 </LinearLayout>

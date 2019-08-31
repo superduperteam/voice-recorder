@@ -15,80 +15,41 @@
             android:orientation="vertical"
             tools:context=".activities.RecordingPlayerActivity">
 
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/bookmarksRecyclerView"
+                android:layout_width="410dp"
+                android:layout_height="163dp"
+                android:layout_below="@id/view"
+                android:layout_marginTop="28dp"
+
+                app:layout_constraintBottom_toTopOf="@+id/seekbar"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/view"
+                app:layout_constraintVertical_bias="0.0">
+
+            </androidx.recyclerview.widget.RecyclerView>
+
+            <View
+                android:id="@+id/view"
+                android:layout_width="410dp"
+                android:layout_height="252dp"
+                android:background="@color/av_dark_blue"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.333"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
             <ImageButton
                 android:id="@+id/recordingPlayerSpeedUp"
                 android:layout_width="56dp"
                 android:layout_height="56dp"
                 android:layout_alignParentBottom="true"
-                android:layout_marginEnd="68dp"
-                android:layout_marginBottom="80dp"
+                android:layout_marginEnd="64dp"
+                android:layout_marginBottom="64dp"
                 android:background="@drawable/ic_fast_forward"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
-
-            <ImageButton
-                android:id="@+id/recordingPlayerSpeedDown"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:layout_alignParentBottom="true"
-                android:layout_marginStart="68dp"
-                android:layout_marginBottom="80dp"
-                android:background="@drawable/ic_fast_rewind"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
-
-            <ImageButton
-                android:id="@+id/recordingDelete"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_alignParentBottom="true"
-                android:layout_marginStart="68dp"
-                android:layout_marginTop="84dp"
-                android:background="@drawable/ic_delete"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <ImageButton
-                android:id="@+id/recordingTrim"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_alignParentBottom="true"
-                android:layout_marginStart="5dp"
-                android:layout_marginTop="84dp"
-                android:layout_marginEnd="8dp"
-                android:background="@drawable/ic_trim"
-                app:layout_constraintEnd_toStartOf="@+id/recordingShare"
-                app:layout_constraintHorizontal_bias="0.505"
-                app:layout_constraintStart_toEndOf="@+id/recordingDelete"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <ImageButton
-                android:id="@+id/recordingShare"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_alignParentBottom="true"
-                android:layout_marginTop="84dp"
-                android:layout_marginEnd="68dp"
-                android:background="@drawable/ic_share"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <ImageButton
-                android:id="@+id/recordingPlayerBookmarks"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_alignParentBottom="true"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="68dp"
-                android:layout_marginBottom="56dp"
-                android:background="@drawable/ic_collection_bookmark"
-                app:layout_constraintBottom_toTopOf="@+id/recordingPlayerSpeedUp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="1.0"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/recordingShare"
-                app:layout_constraintVertical_bias="1.0" />
 
             <ImageButton
                 android:id="@+id/recordingPlayerPlay"
@@ -97,12 +58,63 @@
                 android:layout_alignParentBottom="true"
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="8dp"
-                android:layout_marginBottom="76dp"
-                android:background="@drawable/ic_play_arrow"
+                android:layout_marginBottom="60dp"
+                android:background="@drawable/ic_play_arrow_triangle_alt1"
+                android:onClick="onPlayButtonClick"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/recordingPlayerSpeedUp"
-                app:layout_constraintHorizontal_bias="0.494"
+                app:layout_constraintHorizontal_bias="0.472"
                 app:layout_constraintStart_toEndOf="@+id/recordingPlayerSpeedDown" />
+
+            <ImageButton
+                android:id="@+id/recordingPlayerSpeedDown"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:layout_alignParentBottom="true"
+                android:layout_marginStart="68dp"
+                android:layout_marginBottom="64dp"
+                android:background="@drawable/ic_fast_rewind"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="420dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="@+id/seekbar"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="@+id/seekbar"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.327" />
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="420dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="@+id/seekbar"
+                app:layout_constraintHorizontal_bias="1.0"
+                app:layout_constraintStart_toStartOf="@+id/seekbar"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.327" />
+
+            <SeekBar
+                android:id="@+id/seekbar"
+                android:layout_width="378dp"
+                android:layout_height="41dp"
+                android:layout_gravity="center"
+                android:layout_margin="16dp"
+                android:progressTint="@color/Black"
+                app:layout_constraintBottom_toTopOf="@+id/recordingPlayerPlay"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.484"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.989" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 </LinearLayout>
