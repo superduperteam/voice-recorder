@@ -251,7 +251,14 @@ public class MainActivity extends BaseActivity {
 
     @Override
     public void onDestroy() {
-
+        if(recorder != null) {
+            try {
+                recorder.stop();
+            } finally {
+                recorder.release();
+                recorder = null;
+            }
+        }
         try{
             if(actionReceiver!=null)
                 unregisterReceiver(actionReceiver);

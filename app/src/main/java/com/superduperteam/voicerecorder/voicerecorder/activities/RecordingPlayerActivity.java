@@ -26,8 +26,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-
-public class RecordingPlayerActivity extends BaseActivity {
+public class RecordingPlayerActivity extends BaseActivity implements BookmarkClickedListener {
     private Recording recording;
     private static final String LOG_TAG = "AudioRecordTest";
     private ImageButton playButton;
@@ -76,7 +75,7 @@ public class RecordingPlayerActivity extends BaseActivity {
         if (animator instanceof DefaultItemAnimator) {
             ((DefaultItemAnimator) animator).setSupportsChangeAnimations(false);
         }
-        adapter = new BookmarksRecyclerViewAdapter(this, new ArrayList<>(recording.getBookmarksList()));
+        adapter = new BookmarksRecyclerViewAdapter(this, new ArrayList<>(recording.getBookmarksList()), recyclerView, this);
         recyclerView.setAdapter(adapter);
 
 
@@ -184,8 +183,10 @@ public class RecordingPlayerActivity extends BaseActivity {
     private Runnable mUpdateSeekbar = new Runnable() {
         @Override
         public void run() {
-            seekBar.setProgress(mediaPlayer.getCurrentPosition());
-            mHandler.postDelayed(this, 50);
+            if(seekBar != null && mediaPlayer != null){
+                seekBar.setProgress(mediaPlayer.getCurrentPosition());
+                mHandler.postDelayed(this, 50);
+            }
         }
     };
 
@@ -195,6 +196,15 @@ public class RecordingPlayerActivity extends BaseActivity {
         mediaPlayer.stop();
         mediaPlayer.release();
         mediaPlayer = null;
+        mHandler.removeCallbacks(mUpdateSeekbar);
+    }
+
+    @Override
+    public void OnClick(int time) {
+        if (mediaPlayer != null) {
+            seekBar.setProgress(time);
+            mediaPlayer.seekTo(time);
+        }
     }
 
 //    private void pauseMediaPlayer() {

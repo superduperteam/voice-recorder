@@ -3,12 +3,12 @@ package com.superduperteam.voicerecorder.voicerecorder.activities;
 import android.text.Spannable;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.superduperteam.voicerecorder.voicerecorder.R;
 import com.thoughtbot.expandablerecyclerview.viewholders.ChildViewHolder;
 
 class BookmarkViewHolder extends ChildViewHolder {
-
     private TextView childTextView;
     private TextView textViewTime;
 

@@ -2,25 +2,18 @@ package com.superduperteam.voicerecorder.voicerecorder.activities;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
-import android.provider.MediaStore;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.superduperteam.voicerecorder.voicerecorder.R;
-import com.thoughtbot.expandablerecyclerview.ExpandableRecyclerViewAdapter;
-import com.thoughtbot.expandablerecyclerview.models.ExpandableListPosition;
-import com.thoughtbot.expandablerecyclerview.viewholders.GroupViewHolder;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,30 +27,37 @@ import java.util.concurrent.TimeUnit;
 //RecyclerView.Adapter<BookmarksRecyclerViewAdapter.ViewHolder>
 //RecordingViewHolder
 public class BookmarksRecyclerViewAdapter extends RecyclerView.Adapter<BookmarkViewHolder> {
-
     private static final String LOG_TAG = "AudioRecordTest";
+    private final RecyclerView rv;
     private List<Bookmark> bookmarks;
     Context context;
     private LayoutInflater mInflater;
-    private ItemClickListener mClickListener;
+//    private ItemClickListener mClickListener;
     private MediaMetadataRetriever mmr;
     private MediaPlayer player = new MediaPlayer();
     private int recordingToResumePosition = -1; //-1 means not recording was paused and should be resumed
     private boolean shouldSetDataSource = true;
     private ImageButton lastPlayed;
+    private View.OnClickListener mOnClickListener;
+    private BookmarkClickedListener bookmarkClickedListener;
 
     // data is passed into the constructor
-    BookmarksRecyclerViewAdapter(Context context, List<Bookmark> bookmarks) {
+    BookmarksRecyclerViewAdapter(Context context, List<Bookmark> bookmarks, RecyclerView recyclerView, BookmarkClickedListener listener) {
         this.context = context;
         this.mInflater = LayoutInflater.from(context);
         this.bookmarks = bookmarks;
+        this.rv = recyclerView;
+        this.mOnClickListener = new MyOnClickListener();
+        this.bookmarkClickedListener = listener;
     }
 
     // inflates the row layout from xml when needed
     @Override
     public BookmarkViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = mInflater.inflate(R.layout.bookmark_row, parent, false);
-        return new BookmarkViewHolder(view);
+        BookmarkViewHolder bookmarkViewHolder = new BookmarkViewHolder(view);
+        view.setOnClickListener(mOnClickListener);
+        return bookmarkViewHolder;
     }
 
     // binds the data to the TextView in each row
@@ -94,6 +94,9 @@ public class BookmarksRecyclerViewAdapter extends RecyclerView.Adapter<BookmarkV
     public int getItemCount() {
         return bookmarks.size();
     }
+
+
+
 
 //    // stores and recycles views as they are scrolled off screen
 //    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -170,7 +173,7 @@ public class BookmarksRecyclerViewAdapter extends RecyclerView.Adapter<BookmarkV
 //            });
 //            itemView.setOnClickListener(this);
 //        }
-
+//
 //        @Override
 //        public void onClick(View view) {
 //           // if (mClickListener != null) mClickListener.onItemClick(view, getAdapterPosition());
@@ -195,12 +198,24 @@ public class BookmarksRecyclerViewAdapter extends RecyclerView.Adapter<BookmarkV
     }
 
     // allows clicks events to be caught
-    void setClickListener(ItemClickListener itemClickListener) {
-        this.mClickListener = itemClickListener;
-    }
+//    void setClickListener(ItemClickListener itemClickListener) {
+//        this.mClickListener = itemClickListener;
+//    }
 
     // parent activity will implement this method to respond to click events
     public interface ItemClickListener {
         void onItemClick(View view, int position);
+    }
+
+    public class MyOnClickListener implements View.OnClickListener {
+        @Override
+        public void onClick(View v) {
+            int itemPosition = rv.getChildLayoutPosition(v);
+            Bookmark bookmarkClicked = bookmarks.get(itemPosition);
+//            String time = convertMilliSecondsToRecordingTime(bookmarkClicked.getTimestamp());
+            Integer timestamp = Integer.getInteger(bookmarkClicked.getTimestamp().toString());
+
+            bookmarkClickedListener.OnClick(bookmarkClicked.getTimestamp().intValue());
+        }
     }
 }
