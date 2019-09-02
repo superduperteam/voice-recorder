@@ -1,22 +1,17 @@
 package com.superduperteam.voicerecorder.voicerecorder.activities;
 
 import android.content.Context;
-import android.content.Intent;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.superduperteam.voicerecorder.voicerecorder.R;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -26,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 // https://stackoverflow.com/questions/40584424/simple-android-recyclerview-example
 //RecyclerView.Adapter<BookmarksRecyclerViewAdapter.ViewHolder>
 //RecordingViewHolder
-public class BookmarksRecyclerViewAdapter extends RecyclerView.Adapter<BookmarkViewHolder> {
+public class BookmarksRecyclerViewAdapter extends RecyclerView.Adapter<RecordingsAdapter.BookmarkViewHolder> {
     private static final String LOG_TAG = "AudioRecordTest";
     private final RecyclerView rv;
     private List<Bookmark> bookmarks;
@@ -53,16 +48,16 @@ public class BookmarksRecyclerViewAdapter extends RecyclerView.Adapter<BookmarkV
 
     // inflates the row layout from xml when needed
     @Override
-    public BookmarkViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public RecordingsAdapter.BookmarkViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = mInflater.inflate(R.layout.bookmark_row, parent, false);
-        BookmarkViewHolder bookmarkViewHolder = new BookmarkViewHolder(view);
+        RecordingsAdapter.BookmarkViewHolder bookmarkViewHolder = new RecordingsAdapter.BookmarkViewHolder(view);
         view.setOnClickListener(mOnClickListener);
         return bookmarkViewHolder;
     }
 
     // binds the data to the TextView in each row
     @Override
-    public void onBindViewHolder(BookmarkViewHolder holder, int position) {
+    public void onBindViewHolder(RecordingsAdapter.BookmarkViewHolder holder, int position) {
         Bookmark bookmark = bookmarks.get(position);
 
         holder.setBookmarkText(bookmark.getTitle());

@@ -61,7 +61,7 @@ public class RecordingsActivity extends BaseActivity implements SearchView.OnQue
 //public class RecordingsActivity extends BaseActivity implements PopupMenu.OnMenuItemClickListener, MyNewRecyclerViewAdapter.ItemClickListener, SearchView.OnQueryTextListener {
     private RecyclerView recyclerView;
     private List selectedItems;
-    private GenreAdapter adapter;
+    private RecordingsAdapter adapter;
     private File recordingsFolder;
     private MediaMetadataRetriever mediaMetadataRetriever;
     private EditText searchBookmarkEditText;
@@ -113,7 +113,7 @@ public class RecordingsActivity extends BaseActivity implements SearchView.OnQue
             ((DefaultItemAnimator) animator).setSupportsChangeAnimations(false);
         }
 
-        adapter = new GenreAdapter(this, new ArrayList<>(recordings));
+        adapter = new RecordingsAdapter(this, new ArrayList<>(recordings), recyclerView);
 //        adapter = new MyNewRecyclerViewAdapter(this, recordings);
 //        adapter.setClickListener(this);
         recyclerView.setAdapter(adapter);

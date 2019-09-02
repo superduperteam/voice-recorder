@@ -4,34 +4,36 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
+import android.text.Spannable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ExpandableListView;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import com.thoughtbot.expandablerecyclerview.*;
 
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.superduperteam.voicerecorder.voicerecorder.R;
-import com.thoughtbot.expandablerecyclerview.ExpandCollapseController;
-import com.thoughtbot.expandablerecyclerview.ExpandableRecyclerViewAdapter;
 import com.thoughtbot.expandablerecyclerview.listeners.OnGroupClickListener;
 import com.thoughtbot.expandablerecyclerview.models.ExpandableGroup;
 import com.thoughtbot.expandablerecyclerview.models.ExpandableList;
 import com.thoughtbot.expandablerecyclerview.models.ExpandableListPosition;
+import com.thoughtbot.expandablerecyclerview.viewholders.ChildViewHolder;
 import com.thoughtbot.expandablerecyclerview.viewholders.GroupViewHolder;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.security.acl.Group;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
-public class GenreAdapter extends CustomExpandableRecyclerViewAdapter<GenreAdapter.RecordingViewHolder, BookmarkViewHolder> {
+public class RecordingsAdapter extends CustomExpandableRecyclerViewAdapter<RecordingsAdapter.RecordingViewHolder, RecordingsAdapter.BookmarkViewHolder> implements OnChildClickListener {
     private View.OnClickListener bookmarkClickListener;
     private Context context;
+    private RecyclerView rv;
     private static final String LOG_TAG = "AudioRecordTest";
     private ExpandableList recordings;
     private LayoutInflater mInflater;
@@ -42,14 +44,17 @@ public class GenreAdapter extends CustomExpandableRecyclerViewAdapter<GenreAdapt
     private ImageButton lastPlayed;
 
 
-  public GenreAdapter(Context context, List<? extends ExpandableGroup> recordingGroups) {
+    public RecordingsAdapter(Context context, List<? extends ExpandableGroup> recordingGroups, RecyclerView rv) {
     super(recordingGroups);
     this.context = context;
+    this.rv = rv;
     mmr = new MediaMetadataRetriever(); //used to get duration of recording. much lighter than MediaPlayer
+
   }
 
   @Override
   public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+
     switch (viewType) {
       case ExpandableListPosition.GROUP:
         RecordingViewHolder recordingViewHolder = onCreateGroupViewHolder(parent, viewType);
@@ -74,21 +79,31 @@ public class GenreAdapter extends CustomExpandableRecyclerViewAdapter<GenreAdapt
   public BookmarkViewHolder onCreateChildViewHolder(ViewGroup parent, int viewType) {
     View view = LayoutInflater.from(parent.getContext())
         .inflate(R.layout.bookmark_row, parent, false);
-    return new BookmarkViewHolder(view);
+      BookmarkViewHolder bookmarkViewHolder = new BookmarkViewHolder(view);
+
+      bookmarkViewHolder.setListener(this);
+      return bookmarkViewHolder;
   }
 
   @Override
   public void onBindChildViewHolder(BookmarkViewHolder holder, int flatPosition,
                                     ExpandableGroup group, int childIndex) {
 
-    final Bookmark bookmark = ((Recording) group).getItems().get(childIndex);
-    holder.setBookmarkText(bookmark.getTitle());
-    holder.setTimeText(convertMilliSecondsToRecordingTime(bookmark.getTimestamp()));
+        final Bookmark bookmark = ((Recording) group).getItems().get(childIndex);
+        holder.setBookmarkText(bookmark.getTitle());
+        holder.setTimeText(convertMilliSecondsToRecordingTime(bookmark.getTimestamp()));
+        holder.setBookmark(bookmark);
+//      holder.itemView.setOnClickListener(new View.OnClickListener() {
+//          @Override
+//          public void onClick(View v) {
+////              Bookmark bookmark = ((Recording) group).getItems().get(childPosition);
+////              createIntentForRecordingPlayer(bookmark.getTimestamp().intValue(), groupPosition);
+//          }
+//      });
   }
 
   @Override
-  public void onBindGroupViewHolder(RecordingViewHolder holder, int flatPosition,
-      ExpandableGroup group) {
+  public void onBindGroupViewHolder(RecordingViewHolder holder, int flatPosition, ExpandableGroup group) {
 
       String recordingName = getItem(flatPosition).getTitle();
       String recordingDuration;
@@ -106,7 +121,6 @@ public class GenreAdapter extends CustomExpandableRecyclerViewAdapter<GenreAdapt
       holder.recordingDurationTextView.setText(recordingDuration);
       holder.recordingNameTextView.setText(recordingName);
       holder.recordingBookmarksCount.setText(String.valueOf(group.getItemCount()));
-
 
       holder.setRecordingTitle(group);
   }
@@ -165,6 +179,7 @@ public class GenreAdapter extends CustomExpandableRecyclerViewAdapter<GenreAdapt
 //        notifyGroupDataChanged();
     }
 
+
     private void expandRecordingGroupsThatShouldBeExpanded() {
 //        togglGroupsThatShouldBeExpanded1();
 
@@ -187,9 +202,9 @@ public class GenreAdapter extends CustomExpandableRecyclerViewAdapter<GenreAdapt
 //
 //            }
 //        }
-        for(int i=0; i<getGroups().size();i++){
-
-        }
+//        for(int i=0; i<getGroups().size();i++){
+//
+//        }
     }
 
     public void notifyGroupDataChanged() {
@@ -242,10 +257,65 @@ public class GenreAdapter extends CustomExpandableRecyclerViewAdapter<GenreAdapt
   }
 
   private Recording getItem(int position){
-      return (Recording)(expandableList.groups.get(position));
+        if(expandableList.groups.size() > position){
+            return (Recording)(expandableList.groups.get(position));
+        }
+        return null;
   }
 
-  public class RecordingViewHolder extends GroupViewHolder {
+//    @Override
+//    public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+//        ExpandableGroup group = expandableList.groups.get(groupPosition);
+//        Bookmark bookmark = ((Recording) group).getItems().get(childPosition);
+//        createIntentForRecordingPlayer(bookmark.getTimestamp().intValue(), groupPosition);
+//        return true;
+//    }
+
+
+    private void createIntentForRecordingPlayer(int startTimestamp, Recording recording) {
+
+        if(recording != null){
+            File fileToPlay = recording.getFile();
+            Intent intent = new Intent(context, RecordingPlayerActivity.class);
+            intent.putExtra("fileToPlayPath", fileToPlay.getAbsolutePath());
+            intent.putExtra("startTimestamp", String.valueOf(startTimestamp));
+            context.startActivity(intent);
+        }
+    }
+
+    @Override
+    public void onChildClick(Bookmark bookmark) {
+        if(bookmark != null) {
+
+            for (ExpandableGroup group : getGroups()) {
+                if (group instanceof Recording) {
+                    for (Object currBookmark : group.getItems()) {
+                        if (currBookmark == bookmark) {
+                            File file = ((Recording) group).getFile();
+                            createIntentForRecordingPlayer(bookmark.getTimestamp().intValue(), (Recording) group);
+                        }
+                    }
+                }
+            }
+        }
+
+
+//        ExpandableGroup group = getFlattenedGroupPosition();
+//
+//        Bookmark bookmark = ((Recording) group).getItems().get(childPosition);
+//        createIntentForRecordingPlayer(bookmark.getTimestamp().intValue(), groupPosition);
+//        createIntentForRecordingPlayer();
+
+//        getItem()
+    }
+
+
+//    private int getChildItemIndex(int index){
+//
+//    }
+
+    ////////////////// INNER CLASS /////////////////
+    public class RecordingViewHolder extends GroupViewHolder {
 
       TextView recordingDate;
       TextView recordingNameTextView;
@@ -333,14 +403,14 @@ public class GenreAdapter extends CustomExpandableRecyclerViewAdapter<GenreAdapt
 //                  expand();
 //              }
 
-          int position = getAdapterPosition();
-          File fileToPlay = getItem(position).getFile();
-          Intent intent = new Intent(context, RecordingPlayerActivity.class);
-          intent.putExtra("fileToPlayPath", fileToPlay.getAbsolutePath());
-          context.startActivity(intent);
+          Recording recording = getItem(getAdapterPosition());
+          createIntentForRecordingPlayer(0, recording);
+
       }
 
-      @Override
+
+
+        @Override
       public void setOnGroupClickListener(OnGroupClickListener listener) {
           this.listener = listener;
       }
@@ -375,4 +445,62 @@ public class GenreAdapter extends CustomExpandableRecyclerViewAdapter<GenreAdapt
   //        arrow.setAnimation(rotate);
   //    }
   }
+
+//    public class MyOnClickListener implements View.OnClickListener {
+//        @Override
+//        public void onClick(View v) {
+//            int itemPosition = rv.getChildLayoutPosition(v);
+//
+//            expandableList.getExpandableGroup(0).getItems()
+//            Bookmark bookmarkClicked = bookmarks.get(itemPosition);
+////            String time = convertMilliSecondsToRecordingTime(bookmarkClicked.getTimestamp());
+//            Integer timestamp = Integer.getInteger(bookmarkClicked.getTimestamp().toString());
+//
+//            bookmarkClickedListener.OnClick(bookmarkClicked.getTimestamp().intValue());
+//        }
+//    }
+
+    static class BookmarkViewHolder extends ChildViewHolder{
+        private TextView childTextView;
+        private TextView textViewTime;
+        private OnChildClickListener listener;
+
+        private Bookmark bookmark;
+
+        public BookmarkViewHolder(View itemView) {
+            super(itemView);
+            childTextView = itemView.findViewById(R.id.bookmark_name);
+            textViewTime = itemView.findViewById(R.id.bookmark_time);
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (listener != null) {
+                        int groupPosition; // TODO: 9/1/2019 saar: need to find a way to get the his parent group
+                        listener.onChildClick(bookmark);
+                    }
+                }
+            });
+        }
+
+        public Bookmark getBookmark() {
+            return bookmark;
+        }
+
+        public void setBookmark(Bookmark bookmark) {
+            this.bookmark = bookmark;
+        }
+
+
+        public void setListener(OnChildClickListener listener) {
+            this.listener = listener;
+        }
+
+        public void setBookmarkText(Spannable name) {
+            childTextView.setText(name);
+        }
+
+        public void setTimeText(String time) {
+            this.textViewTime.setText(time);
+        }
+    }
 }

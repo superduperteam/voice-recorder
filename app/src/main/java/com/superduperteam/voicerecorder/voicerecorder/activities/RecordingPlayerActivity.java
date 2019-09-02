@@ -56,6 +56,13 @@ public class RecordingPlayerActivity extends BaseActivity implements BookmarkCli
         mDrawer.addView(contentView, 0);
         Intent intent = getIntent();
         String pathToFileToPlay = intent.getStringExtra("fileToPlayPath");
+        String timestampStartStr = intent.getStringExtra("startTimestamp");
+        int timestampStart = 0;
+
+        if(timestampStartStr != null){
+            timestampStart = Integer.valueOf(timestampStartStr);
+        }
+
         File file = new File(pathToFileToPlay);
 
         try {
@@ -63,7 +70,6 @@ public class RecordingPlayerActivity extends BaseActivity implements BookmarkCli
         } catch (IOException e) {
             e.printStackTrace();
         }
-
 
 
 
@@ -87,6 +93,7 @@ public class RecordingPlayerActivity extends BaseActivity implements BookmarkCli
         seekBar = findViewById(R.id.seekbar);
         seekBar.getThumb().setColorFilter(Color.BLACK, PorterDuff.Mode.MULTIPLY);
         seekBar.getThumb().setColorFilter(Color.BLACK, PorterDuff.Mode.SRC_IN);
+        seekBar.setProgress(timestampStart);
         playButton = findViewById(R.id.recordingPlayerPlay);
 //        playButton.setBackgroundResource(R.drawable.ic_pause_circle_outline_black_24dp);
 
@@ -132,7 +139,7 @@ public class RecordingPlayerActivity extends BaseActivity implements BookmarkCli
             }
         });
 
-        playRecording();
+        playRecording(timestampStart);
     }
 
     public void onPlayButtonClick(View v){
@@ -148,7 +155,7 @@ public class RecordingPlayerActivity extends BaseActivity implements BookmarkCli
         }
     }
 
-    public void playRecording() {
+    public void playRecording(int timestampStart) {
         try {
 //            if (mediaPlayer != null && mediaPlayer.isPlaying()) {
 //                pauseMediaPlayer();
@@ -169,6 +176,7 @@ public class RecordingPlayerActivity extends BaseActivity implements BookmarkCli
                 mediaPlayer.prepare();
 //                mediaPlayer.setVolume(0.5f, 0.5f);
                 mediaPlayer.start();
+                mediaPlayer.seekTo(timestampStart);
                 mediaPlayer.setLooping(false);
                 seekBar.setMax(mediaPlayer.getDuration());
                 mHandler.postDelayed(mUpdateSeekbar, 0);
