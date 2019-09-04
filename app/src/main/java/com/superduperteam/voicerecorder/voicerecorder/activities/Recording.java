@@ -1,5 +1,7 @@
 package com.superduperteam.voicerecorder.voicerecorder.activities;
 
+import com.alamkanak.weekview.WeekView;
+import com.superduperteam.voicerecorder.voicerecorder.R;
 import com.thoughtbot.expandablerecyclerview.models.ExpandableGroup;
 import com.thoughtbot.expandablerecyclerview.models.ExpandableList;
 
@@ -19,7 +21,6 @@ public class Recording extends ExpandableGroup<Bookmark> {
         this.file = recordingFile;
         fetchBookmarks(recordingFile);
     }
-
     public List<Bookmark> getBookmarksList() {
         return super.getItems();
     }

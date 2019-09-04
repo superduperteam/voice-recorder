@@ -390,7 +390,17 @@ public class RecordingsActivity extends BaseActivity implements SearchView.OnQue
 
         switch (item.getItemId()) {
             case R.id.recording_clicked_delete:
-                Toast.makeText(this, "delete from recording row", Toast.LENGTH_LONG).show();
+//                Toast.makeText(this, "delete from recording row", Toast.LENGTH_LONG).show();
+                file.delete();
+
+
+                for(Recording recording : recordings){
+                    if(recording.getFile().equals(file) ){
+                        recordings.remove(recording);
+                    }
+                }
+
+                adapter.updateList(recordings);
                 return true;
             case R.id.recording_clicked_edit:
                 Toast.makeText(this, "edit from recording row", Toast.LENGTH_LONG).show();

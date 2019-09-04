@@ -17,6 +17,8 @@ import android.view.Window;
 import com.superduperteam.voicerecorder.voicerecorder.activities.MainActivity;
 import com.superduperteam.voicerecorder.voicerecorder.activities.RecordingPlayerActivity;
 import com.superduperteam.voicerecorder.voicerecorder.activities.RecordingsActivity;
+import com.superduperteam.voicerecorder.voicerecorder.activities.WeeklyNotificationsActivity;
+import com.superduperteam.voicerecorder.voicerecorder.activities.WeeklyNotificationsActivity1;
 import com.superduperteam.voicerecorder.voicerecorder.activities.settingsActivity.SettingsActivity;
 
 public class BaseActivity extends AppCompatActivity {
@@ -59,6 +61,10 @@ public class BaseActivity extends AppCompatActivity {
                                 break;
                             case R.id.nav_recordings:
                                 intent = new Intent(BaseActivity.this, RecordingsActivity.class);
+                                startActivity(intent);
+                                break;
+                            case R.id.nav_weekly_notifications:
+                                intent = new Intent(BaseActivity.this, WeeklyNotificationsActivity1.class);
                                 startActivity(intent);
                                 break;
                             case R.id.nav_settings:

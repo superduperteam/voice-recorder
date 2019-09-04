@@ -15,8 +15,11 @@
             android:id="@+id/nav_recorder"
             android:title="Recorder" />
         <item
-            android:id="@+id/nav_recordings"
-            android:title="Recordings" />
+        android:id="@+id/nav_recordings"
+        android:title="Recordings" />
+        <item
+            android:id="@+id/nav_weekly_notifications"
+            android:title="Weekly Notifications" />
         <item
             android:id="@+id/nav_settings"
             android:title="Settings"
