@@ -53,6 +53,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
@@ -513,7 +516,8 @@ public class RecordingsActivity extends BaseActivity implements SearchView.OnQue
 
     // Saar: This is for Sort button
     public void onSortClick (MenuItem item){
-        alertSortElements();
+
+       alertSortElements();
     }
     public void alertSortElements () {
 
@@ -535,9 +539,9 @@ public class RecordingsActivity extends BaseActivity implements SearchView.OnQue
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @TargetApi(11)
                     public void onClick(DialogInterface dialog, int id) {
+                        List<Recording> newList = new ArrayList<>(recordings);
 
                         String toastString = "";
-
 
                         /*
                          * Getting the value of selected RadioButton.
@@ -549,10 +553,37 @@ public class RecordingsActivity extends BaseActivity implements SearchView.OnQue
                         // find the radiobutton by returned id
                         RadioButton selectedAttributeRadioButton = formElementsView.findViewById(selectedAttributeId);
                         RadioButton selectedOrderRadioButton = formElementsView.findViewById(SelectedOrderId);
-                        toastString += "Selected radio buttons are: " + selectedAttributeRadioButton.getText() + " & "
-                                + selectedOrderRadioButton.getText() + "!\n";
-                        Toast.makeText(getApplicationContext(), toastString, Toast.LENGTH_LONG).show();
+                        toastString += "Selected radio buttons are: " + selectedAttributeRadioButton.getText() + " & " + selectedOrderRadioButton.getText() + "!\n";
+                        if(selectedAttributeRadioButton.getId() == R.id.titleRadioButton){
+                            Collections.sort(newList, new Comparator<Recording>() {
+                                @Override
+                                public int compare(Recording o1, Recording o2) {
+                                    return o1.getTitle().compareTo(o2.getTitle());
+                                }
+                            });
+                        }
+                        else{
+                            Collections.sort(newList, new Comparator<Recording>() {
+                                @Override
+                                public int compare(Recording o1, Recording o2) {
+                                    if(o1.getFile().lastModified() == o2.getFile().lastModified()){
+                                        return 0;
+                                    }
+                                    else if(o1.getFile().lastModified() < o2.getFile().lastModified()){
+                                        return -1;
+                                    }
+                                    else{
+                                        return 1;
+                                    }
+                                }
+                            });
+                        }
 
+                        if(selectedOrderRadioButton.getId() == R.id.descendingRadioButton){
+                            Collections.reverse(newList);
+                        }
+                        Toast.makeText(getApplicationContext(), toastString, Toast.LENGTH_LONG).show();
+                        adapter.updateList(newList);
                         dialog.cancel();
                     }
 
