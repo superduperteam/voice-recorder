@@ -395,17 +395,28 @@ public class RecordingsActivity extends BaseActivity implements SearchView.OnQue
             case R.id.recording_clicked_delete:
 //                Toast.makeText(this, "delete from recording row", Toast.LENGTH_LONG).show();
                 file.delete();
-
+                Recording deleted= null;
 
                 for(Recording recording : recordings){
                     if(recording.getFile().equals(file) ){
-                        recordings.remove(recording);
+                        deleted = recording;
+                        break;
                     }
+                }
+
+                if(deleted != null){
+                    recordings.remove(deleted);
                 }
 
                 adapter.updateList(recordings);
                 return true;
             case R.id.recording_clicked_edit:
+                Recording rec;
+                for(Recording recording : recordings){
+                    if(recording.getFile().equals(file) ){
+                        recordings.remove(recording);
+                    }
+                }
                 Toast.makeText(this, "edit from recording row", Toast.LENGTH_LONG).show();
                 return true;
             case R.id.share_recording:
@@ -488,6 +499,8 @@ public class RecordingsActivity extends BaseActivity implements SearchView.OnQue
         }
     }
 
+
+
     private String copyFiletoExternalStorage() {
         String pathSDCard = Environment.getExternalStorageDirectory() + "/Android/data/" + "Recording 4.m4a";
         try {
@@ -520,16 +533,12 @@ public class RecordingsActivity extends BaseActivity implements SearchView.OnQue
        alertSortElements();
     }
     public void alertSortElements () {
-
         /*
          * Inflate the XML view. activity_main is in
          * res/layout/form_elements.xml
          */
         LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        final View formElementsView = inflater.inflate(R.layout.sort_elements,
-                null, false);
-
-
+        final View formElementsView = inflater.inflate(R.layout.sort_elements, null, false);
         final RadioGroup sortOrderRadioGroup = formElementsView.findViewById(R.id.sortOrderRadioGroup);
         final RadioGroup sortByAttributeGroup = formElementsView.findViewById(R.id.sortByRadioGroup);
 
@@ -540,7 +549,6 @@ public class RecordingsActivity extends BaseActivity implements SearchView.OnQue
                     @TargetApi(11)
                     public void onClick(DialogInterface dialog, int id) {
                         List<Recording> newList = new ArrayList<>(recordings);
-
                         String toastString = "";
 
                         /*
@@ -553,38 +561,42 @@ public class RecordingsActivity extends BaseActivity implements SearchView.OnQue
                         // find the radiobutton by returned id
                         RadioButton selectedAttributeRadioButton = formElementsView.findViewById(selectedAttributeId);
                         RadioButton selectedOrderRadioButton = formElementsView.findViewById(SelectedOrderId);
-                        toastString += "Selected radio buttons are: " + selectedAttributeRadioButton.getText() + " & " + selectedOrderRadioButton.getText() + "!\n";
-                        if(selectedAttributeRadioButton.getId() == R.id.titleRadioButton){
-                            Collections.sort(newList, new Comparator<Recording>() {
-                                @Override
-                                public int compare(Recording o1, Recording o2) {
-                                    return o1.getTitle().compareTo(o2.getTitle());
-                                }
-                            });
-                        }
-                        else{
-                            Collections.sort(newList, new Comparator<Recording>() {
-                                @Override
-                                public int compare(Recording o1, Recording o2) {
-                                    if(o1.getFile().lastModified() == o2.getFile().lastModified()){
-                                        return 0;
+
+                        if(selectedAttributeId != -1 && SelectedOrderId != -1){
+                            toastString += "Selected radio buttons are: " + selectedAttributeRadioButton.getText() + " & " + selectedOrderRadioButton.getText() + "!\n";
+                            if(selectedAttributeRadioButton.getId() == R.id.titleRadioButton){
+                                Collections.sort(newList, new Comparator<Recording>() {
+                                    @Override
+                                    public int compare(Recording o1, Recording o2) {
+                                        return o1.getTitle().toLowerCase().compareTo(o2.getTitle().toLowerCase());
                                     }
-                                    else if(o1.getFile().lastModified() < o2.getFile().lastModified()){
-                                        return -1;
+                                });
+                            }
+                            else{
+                                Collections.sort(newList, new Comparator<Recording>() {
+                                    @Override
+                                    public int compare(Recording o1, Recording o2) {
+                                        if(o1.getFile().lastModified() == o2.getFile().lastModified()){
+                                            return 0;
+                                        }
+                                        else if(o1.getFile().lastModified() < o2.getFile().lastModified()){
+                                            return -1;
+                                        }
+                                        else{
+                                            return 1;
+                                        }
                                     }
-                                    else{
-                                        return 1;
-                                    }
-                                }
-                            });
+                                });
+                            }
+
+                            if(selectedOrderRadioButton.getId() == R.id.descendingRadioButton){
+                                Collections.reverse(newList);
+                            }
+                            Toast.makeText(getApplicationContext(), toastString, Toast.LENGTH_LONG).show();
+                            adapter.updateList(newList);
+                            dialog.cancel();
                         }
 
-                        if(selectedOrderRadioButton.getId() == R.id.descendingRadioButton){
-                            Collections.reverse(newList);
-                        }
-                        Toast.makeText(getApplicationContext(), toastString, Toast.LENGTH_LONG).show();
-                        adapter.updateList(newList);
-                        dialog.cancel();
                     }
 
                 }).show();
@@ -597,8 +609,6 @@ public class RecordingsActivity extends BaseActivity implements SearchView.OnQue
 //
 //        public void onPlayClick (View view,int position){
 //        }
-
-
     // Saar: This is to make the buttons in the top to show : search and sort
     @Override
     public boolean onCreateOptionsMenu (Menu menu){

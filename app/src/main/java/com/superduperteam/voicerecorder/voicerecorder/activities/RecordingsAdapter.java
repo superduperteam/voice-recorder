@@ -43,13 +43,11 @@ public class RecordingsAdapter extends CustomExpandableRecyclerViewAdapter<Recor
     private boolean shouldSetDataSource = true;
     private ImageButton lastPlayed;
 
-
     public RecordingsAdapter(Context context, List<? extends ExpandableGroup> recordingGroups, RecyclerView rv) {
     super(recordingGroups);
     this.context = context;
     this.rv = rv;
     mmr = new MediaMetadataRetriever(); //used to get duration of recording. much lighter than MediaPlayer
-
   }
 
   @Override
@@ -316,7 +314,6 @@ public class RecordingsAdapter extends CustomExpandableRecyclerViewAdapter<Recor
 
     ////////////////// INNER CLASS /////////////////
     public class RecordingViewHolder extends GroupViewHolder {
-
       TextView recordingDate;
       TextView recordingNameTextView;
       TextView recordingDurationTextView;
@@ -405,9 +402,7 @@ public class RecordingsAdapter extends CustomExpandableRecyclerViewAdapter<Recor
 
           Recording recording = getItem(getAdapterPosition());
           createIntentForRecordingPlayer(0, recording);
-
       }
-
 
 
         @Override

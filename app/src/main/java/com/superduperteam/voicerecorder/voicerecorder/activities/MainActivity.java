@@ -1,11 +1,13 @@
 package com.superduperteam.voicerecorder.voicerecorder.activities;
 
 import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -18,6 +20,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.SystemClock;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 
@@ -31,16 +34,25 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.RemoteViews;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.superduperteam.voicerecorder.voicerecorder.BaseActivity;
 import com.superduperteam.voicerecorder.voicerecorder.R;
 import com.superduperteam.voicerecorder.voicerecorder.VisualizerView;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -59,8 +71,11 @@ public class MainActivity extends BaseActivity {
     private List<Bookmark> bookmarksList;
     private ImageButton bookmarkImageButton;
     private EditText bookmarkNameEditText;
+    private EditText recordingNameEditText;
     private View addBookmarkView;
+    private View addRecordingView;
     private PopupWindow addBookmarkPopupWindow;
+    private PopupWindow addRecordingPopupWindow;
     private static final String STOP_RECORDING_ACTION = "stop";
     private static final String PAUSE_OR_RESUME_RECORDING_ACTION = "pauseOrResume";
     //voice recorder
@@ -273,6 +288,11 @@ public class MainActivity extends BaseActivity {
             resetStopWatch();
             findViewById(R.id.record_button).setBackgroundResource(R.drawable.ic_record_button);
             stopRecording();
+
+            if(view != null){
+                onRecordingNaming(getWindow().getDecorView());
+            }
+
             if(nPanel != null){
                 nPanel.notificationCancel();
             }
@@ -331,8 +351,78 @@ private long pauseOffset = 0;
         visualizerView.clear();
         visualizerView.invalidate();
         addBookmarksToMetadata();
-        startPlaying();
+
+//        alertRecordingNaming();
+
+//        startPlaying();
     }
+
+//    public void alertRecordingNaming () {
+//        /*
+//         * Inflate the XML view. activity_main is in
+//         * res/layout/form_elements.xml
+//         */
+//        LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+//        final View formElementsView = inflater.inflate(R.layout.sort_elements, null, false);
+//        final RadioGroup sortOrderRadioGroup = formElementsView.findViewById(R.id.sortOrderRadioGroup);
+//        final RadioGroup sortByAttributeGroup = formElementsView.findViewById(R.id.sortByRadioGroup);
+//
+//        // the alert dialog
+//        new AlertDialog.Builder(RecordingsActivity.this).setView(formElementsView)
+//                .setTitle("Sort")
+//                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+//                    @TargetApi(11)
+//                    public void onClick(DialogInterface dialog, int id) {
+//                        List<Recording> newList = new ArrayList<>(recordings);
+//                        String toastString = "";
+//
+//                        /*
+//                         * Getting the value of selected RadioButton.
+//                         */
+//                        // get selected radio button from radioGroup
+//                        int selectedAttributeId = sortByAttributeGroup.getCheckedRadioButtonId();
+//                        int SelectedOrderId = sortOrderRadioGroup.getCheckedRadioButtonId();
+//
+//                        // find the radiobutton by returned id
+//                        RadioButton selectedAttributeRadioButton = formElementsView.findViewById(selectedAttributeId);
+//                        RadioButton selectedOrderRadioButton = formElementsView.findViewById(SelectedOrderId);
+//                        toastString += "Selected radio buttons are: " + selectedAttributeRadioButton.getText() + " & " + selectedOrderRadioButton.getText() + "!\n";
+//                        if(selectedAttributeRadioButton.getId() == R.id.titleRadioButton){
+//                            Collections.sort(newList, new Comparator<Recording>() {
+//                                @Override
+//                                public int compare(Recording o1, Recording o2) {
+//                                    return o1.getTitle().compareTo(o2.getTitle());
+//                                }
+//                            });
+//                        }
+//                        else{
+//                            Collections.sort(newList, new Comparator<Recording>() {
+//                                @Override
+//                                public int compare(Recording o1, Recording o2) {
+//                                    if(o1.getFile().lastModified() == o2.getFile().lastModified()){
+//                                        return 0;
+//                                    }
+//                                    else if(o1.getFile().lastModified() < o2.getFile().lastModified()){
+//                                        return -1;
+//                                    }
+//                                    else{
+//                                        return 1;
+//                                    }
+//                                }
+//                            });
+//                        }
+//
+//                        if(selectedOrderRadioButton.getId() == R.id.descendingRadioButton){
+//                            Collections.reverse(newList);
+//                        }
+//                        Toast.makeText(getApplicationContext(), toastString, Toast.LENGTH_LONG).show();
+//                        adapter.updateList(newList);
+//                        dialog.cancel();
+//                    }
+//
+//                }).show();
+//    }
+
 
     private void pauseRecording() {
         recorder.pause();
@@ -386,35 +476,6 @@ private long pauseOffset = 0;
         }
     }
 
-    public void onButtonShowPopupWindowClick(View view) {
-
-        // inflate the layout of the popup window
-        LayoutInflater inflater = (LayoutInflater)
-                getSystemService(LAYOUT_INFLATER_SERVICE);
-        addBookmarkView = inflater.inflate(R.layout.add_bookmark_popup, null);
-
-        // create the popup window
-        int width = LinearLayout.LayoutParams.WRAP_CONTENT;
-        int height = LinearLayout.LayoutParams.WRAP_CONTENT;
-        boolean focusable = true; // lets taps outside the popup also dismiss it
-        addBookmarkPopupWindow = new PopupWindow(addBookmarkView, width, height, focusable);
-
-        // show the popup window
-        // which view you pass in doesn't matter, it is only used for the window tolken
-        addBookmarkPopupWindow.showAtLocation(view, Gravity.CENTER, 0, 0);
-
-        // dismiss the popup window when touched
-        addBookmarkView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                addBookmarkPopupWindow.dismiss();
-                return true;
-            }
-        });
-
-        bookmarkNameEditText = view.findViewById(R.id.add_bookmark_edit_text);
-    }
-
     /* Checks if external storage is available for read and write */
     private boolean isExternalStorageWritable() {
         String state = Environment.getExternalStorageState();
@@ -444,13 +505,111 @@ private long pauseOffset = 0;
         cmd.writeMetadata(lastRecordingPath, sb.toString());
     }
 
+
+
+    public void onRecordingNaming(View view) {
+
+        // inflate the layout of the popup window
+        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+        addRecordingView = inflater.inflate(R.layout.recording_naming_popup, null);
+
+        // create the popup window
+        int width = LinearLayout.LayoutParams.WRAP_CONTENT;
+        int height = LinearLayout.LayoutParams.WRAP_CONTENT;
+        boolean focusable = true; // lets taps outside the popup also dismiss it
+        addRecordingPopupWindow = new PopupWindow(addRecordingView, width, height, focusable);
+
+        // show the popup window
+        // which view you pass in doesn't matter, it is only used for the window tolken
+        addRecordingPopupWindow.showAtLocation(view, Gravity.CENTER, 0, 0);
+
+        // dismiss the popup window when touched
+        addRecordingView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                addRecordingPopupWindow.dismiss();
+                return true;
+            }
+        });
+
+        recordingNameEditText = view.findViewById(R.id.add_recording_edit_text);
+    }
+
+    public void onNameRecordingClick(View view) {
+        recordingNameEditText = addRecordingView.findViewById(R.id.add_recording_edit_text);
+        String recordingName = recordingNameEditText.getText().toString();
+//        System.out.println(recordingName + "1234");
+
+
+        File sdcard = Environment.getExternalStorageDirectory();
+        File from = new File(lastRecordingPath);
+        File to = new File(lastRecordingPath.substring(0, lastRecordingPath.lastIndexOf("/")+1) + recordingName + outputFormat);
+//        try {
+//            copy(from, to);
+//            from.delete();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+        System.out.println(from.renameTo(to) + "^^^^^^");
+
+//        bookmarksList.add(new Bookmark(elapsedTime, bookmarkName));
+        addRecordingPopupWindow.dismiss();
+    }
+
+
+    private static void copy(File src, File dst) throws IOException {
+        InputStream in = new FileInputStream(src);
+        try {
+            OutputStream out = new FileOutputStream(dst);
+            try {
+                // Transfer bytes from in to out
+                byte[] buf = new byte[1024];
+                int len;
+                while ((len = in.read(buf)) > 0) {
+                    out.write(buf, 0, len);
+                }
+            } finally {
+                out.close();
+            }
+        } finally {
+            in.close();
+        }
+    }
+
+
+    public void onButtonShowPopupWindowClick(View view) {
+
+        // inflate the layout of the popup window
+        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+        addBookmarkView = inflater.inflate(R.layout.add_bookmark_popup, null);
+
+        // create the popup window
+        int width = LinearLayout.LayoutParams.WRAP_CONTENT;
+        int height = LinearLayout.LayoutParams.WRAP_CONTENT;
+        boolean focusable = true; // lets taps outside the popup also dismiss it
+        addBookmarkPopupWindow = new PopupWindow(addBookmarkView, width, height, focusable);
+
+        // show the popup window
+        // which view you pass in doesn't matter, it is only used for the window tolken
+        addBookmarkPopupWindow.showAtLocation(view, Gravity.CENTER, 0, 0);
+
+        // dismiss the popup window when touched
+        addBookmarkView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                addBookmarkPopupWindow.dismiss();
+                return true;
+            }
+        });
+
+        bookmarkNameEditText = view.findViewById(R.id.add_bookmark_edit_text);
+    }
+
     public void onAddBookmarkClick(View view) {
         bookmarkNameEditText = addBookmarkView.findViewById(R.id.add_bookmark_edit_text);
         String bookmarkName = bookmarkNameEditText.getText().toString();
-
         long elapsedTime = SystemClock.elapsedRealtime() - chronometer.getBase();
         bookmarksList.add(new Bookmark(elapsedTime, bookmarkName));
-
         addBookmarkPopupWindow.dismiss();
     }
 
@@ -479,6 +638,11 @@ private long pauseOffset = 0;
             this.parent = parent;
             nManager = (NotificationManager) parent.getSystemService(NOTIFICATION_SERVICE);
 
+            Intent notificationIntent = new Intent(parent, MainActivity.class);
+            notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            PendingIntent intent = PendingIntent.getActivity(parent, 0, notificationIntent, 0);
+
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 CharSequence name = parent.getString(R.string.app_name);
                 int importance = NotificationManager.IMPORTANCE_LOW;
@@ -498,6 +662,7 @@ private long pauseOffset = 0;
                     .setChannelId(CHANNEL_ID)
                     .setTicker(null)
                     .setSound(null)
+                    .setContentIntent(intent)
                     .setOngoing(true);
 
 

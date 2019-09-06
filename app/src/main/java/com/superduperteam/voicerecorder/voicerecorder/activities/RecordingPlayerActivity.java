@@ -44,13 +44,6 @@ public class RecordingPlayerActivity extends BaseActivity implements BookmarkCli
 //        setContentView(R.layout.activity_recording_player);
         LayoutInflater inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-
-
-
-
-
-
-
         //inflate your activity layout here!
         View contentView = inflater.inflate(R.layout.activity_recording_player, null, false);
         mDrawer.addView(contentView, 0);
@@ -71,9 +64,6 @@ public class RecordingPlayerActivity extends BaseActivity implements BookmarkCli
             e.printStackTrace();
         }
 
-
-
-
         // set up the RecyclerView
         RecyclerView recyclerView = findViewById(R.id.bookmarksRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -83,11 +73,6 @@ public class RecordingPlayerActivity extends BaseActivity implements BookmarkCli
         }
         adapter = new BookmarksRecyclerViewAdapter(this, new ArrayList<>(recording.getBookmarksList()), recyclerView, this);
         recyclerView.setAdapter(adapter);
-
-
-
-
-
 
         final TextView seekBarHint = findViewById(R.id.textView);
         seekBar = findViewById(R.id.seekbar);
