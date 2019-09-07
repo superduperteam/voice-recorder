@@ -41,6 +41,7 @@
             android:screenOrientation="portrait"
             android:label="@string/title_activity_settings" />
         <activity android:name=".activities.MainActivity"
+            android:screenOrientation="portrait"
             >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -48,7 +49,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.RecordingsActivity">
+        <activity android:name=".activities.RecordingsActivity"
+            android:screenOrientation="portrait">
+
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
 
@@ -58,7 +61,6 @@
                 <data android:mimeType="application/json" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.WeeklyNotificationsActivity1" />
     </application>
 
 </manifest>

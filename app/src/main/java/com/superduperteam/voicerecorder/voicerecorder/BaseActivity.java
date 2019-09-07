@@ -9,16 +9,13 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 
 import com.superduperteam.voicerecorder.voicerecorder.activities.MainActivity;
-import com.superduperteam.voicerecorder.voicerecorder.activities.RecordingPlayerActivity;
 import com.superduperteam.voicerecorder.voicerecorder.activities.RecordingsActivity;
 import com.superduperteam.voicerecorder.voicerecorder.activities.WeeklyNotificationsActivity;
-import com.superduperteam.voicerecorder.voicerecorder.activities.WeeklyNotificationsActivity1;
 import com.superduperteam.voicerecorder.voicerecorder.activities.settingsActivity.SettingsActivity;
 
 public class BaseActivity extends AppCompatActivity {
@@ -64,7 +61,7 @@ public class BaseActivity extends AppCompatActivity {
                                 startActivity(intent);
                                 break;
                             case R.id.nav_weekly_notifications:
-                                intent = new Intent(BaseActivity.this, WeeklyNotificationsActivity1.class);
+                                intent = new Intent(BaseActivity.this, WeeklyNotificationsActivity.class);
                                 startActivity(intent);
                                 break;
                             case R.id.nav_settings:

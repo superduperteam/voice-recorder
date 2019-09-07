@@ -48,4 +48,5 @@ dependencies {
     implementation 'com.tyorikan:voice-recording-visualizer:1.0.3@aar'
     implementation 'com.github.alamkanak:android-week-view:1.2.6'
     implementation 'com.github.halysongoncalves:pugnotification:1.8.1'
+
 }

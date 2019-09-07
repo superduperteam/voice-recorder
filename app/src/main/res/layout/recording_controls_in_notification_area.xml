@@ -17,8 +17,6 @@
         android:layout_margin="10dp"
         android:background="@drawable/ic_pause_circle_filled_black_24dp" />
 
-
-
     <TextView
         android:id="@+id/notification_recording_time"
         android:layout_width="match_parent"
@@ -27,7 +25,5 @@
         android:layout_margin="15dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         android:textColor="#000000"
-        android:text="00:00"/>
-
-
+        android:text="Recording"/>
 </LinearLayout>

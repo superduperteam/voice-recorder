@@ -15,28 +15,49 @@
             android:orientation="vertical"
             tools:context=".activities.RecordingPlayerActivity">
 
+            <!--            <View-->
+<!--                android:id="@+id/view"-->
+<!--                android:layout_width="410dp"-->
+<!--                android:layout_height="252dp"-->
+<!--                android:background="@color/av_dark_blue"-->
+<!--                app:layout_constraintEnd_toEndOf="parent"-->
+<!--                app:layout_constraintHorizontal_bias="0.333"-->
+<!--                app:layout_constraintStart_toStartOf="parent"-->
+<!--                app:layout_constraintTop_toTopOf="parent" />-->
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/bookmarksRecyclerView"
                 android:layout_width="410dp"
-                android:layout_height="163dp"
-                android:layout_below="@id/view"
-                android:layout_marginTop="28dp"
+                android:layout_height="148dp"
+                android:layout_below="@id/circle_line_visualizer"
+                android:layout_marginTop="5dp"
 
                 app:layout_constraintBottom_toTopOf="@+id/seekbar"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/view"
-                app:layout_constraintVertical_bias="0.0">
+                app:layout_constraintTop_toBottomOf="@+id/circle_line_visualizer"
+                app:layout_constraintVertical_bias="0.454">
 
             </androidx.recyclerview.widget.RecyclerView>
 
-            <View
-                android:id="@+id/view"
-                android:layout_width="410dp"
-                android:layout_height="252dp"
-                android:background="@color/av_dark_blue"
+            <com.gauravk.audiovisualizer.visualizer.CircleLineVisualizer
+                android:id="@+id/circle_line_visualizer"
+                android:layout_width="405dp"
+                android:layout_height="255dp"
+                android:layout_marginTop="56dp"
+                android:padding="0dp"
+                android:paddingStart="0dp"
+                android:paddingLeft="0dp"
+                android:paddingTop="0dp"
+                android:paddingEnd="0dp"
+                android:paddingRight="0dp"
+                android:paddingBottom="0dp"
+                app:avColor="@color/Red"
+                app:avDensity="0.8"
+                app:avSpeed="normal"
+                app:avType="fill"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.333"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -48,6 +69,7 @@
                 android:layout_marginEnd="64dp"
                 android:layout_marginBottom="64dp"
                 android:background="@drawable/ic_fast_forward"
+                android:onClick="onSpeedUpClick"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
 
@@ -73,6 +95,7 @@
                 android:layout_alignParentBottom="true"
                 android:layout_marginStart="68dp"
                 android:layout_marginBottom="64dp"
+                android:onClick="onSpeedDownClick"
                 android:background="@drawable/ic_fast_rewind"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />
@@ -82,16 +105,15 @@
                 android:id="@+id/textView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="420dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="@+id/seekbar"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="@+id/seekbar"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.327" />
+                app:layout_constraintTop_toBottomOf="@+id/seekbar"
+                app:layout_constraintVertical_bias="0.0" />
 
             <TextView
-                android:id="@+id/textView2"
+                android:id="@+id/recording_duration_in_recordings_player"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="420dp"
@@ -104,17 +126,17 @@
 
             <SeekBar
                 android:id="@+id/seekbar"
-                android:layout_width="378dp"
-                android:layout_height="41dp"
+                android:layout_width="381dp"
+                android:layout_height="28dp"
                 android:layout_gravity="center"
                 android:layout_margin="16dp"
                 android:progressTint="@color/Black"
                 app:layout_constraintBottom_toTopOf="@+id/recordingPlayerPlay"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.484"
+                app:layout_constraintHorizontal_bias="0.515"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.989" />
+                app:layout_constraintVertical_bias="0.975" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 </LinearLayout>

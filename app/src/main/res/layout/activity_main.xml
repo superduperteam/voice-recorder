@@ -101,12 +101,12 @@
 
         <ImageButton
             android:id="@+id/stop_button"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:layout_alignParentTop="false"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_alignParentTop="true"
             android:layout_alignParentBottom="false"
-            android:layout_marginTop="0dp"
-            android:layout_marginRight="57dp"
+            android:layout_marginTop="17dp"
+            android:layout_marginRight="58dp"
             android:layout_marginBottom="12dp"
             android:layout_toLeftOf="@id/record_button"
             android:background="@drawable/ic_stop"

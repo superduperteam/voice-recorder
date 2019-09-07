@@ -16,5 +16,5 @@
         android:title="Delete" />
     <item
         android:id="@+id/recording_clicked_edit"
-        android:title="Edit" />
+        android:title="Rename" />
 </menu>

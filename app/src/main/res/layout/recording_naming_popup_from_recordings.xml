@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="#2196F3"
+    android:orientation="vertical">
+
+    <EditText
+        android:id="@+id/add_recording_edit_text_from_recordings"
+        android:layout_width="277dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:ems="10"
+        android:hint="Recording name"
+        android:inputType="textPersonName"
+        android:padding="16dp" />
+    <Button
+        android:id="@+id/add_recording_button_from_recordings"
+        android:layout_width="109dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:onClick="onRenameRecordingClick"
+        android:padding="16dp"
+        android:text="Ok" />
+</LinearLayout>

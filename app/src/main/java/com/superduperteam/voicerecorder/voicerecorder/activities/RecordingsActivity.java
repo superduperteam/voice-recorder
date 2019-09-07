@@ -9,15 +9,18 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewParent;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
+import android.widget.PopupWindow;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.SearchView;
@@ -65,15 +68,20 @@ public class RecordingsActivity extends BaseActivity implements SearchView.OnQue
     private RecyclerView recyclerView;
     private List selectedItems;
     private RecordingsAdapter adapter;
+    private final String outputFormat = ".m4a";
     private File recordingsFolder;
     private MediaMetadataRetriever mediaMetadataRetriever;
+    private View renameRecordingView;
     private EditText searchBookmarkEditText;
     private List<Recording> recordings;
+    private PopupWindow nameRecordingPopupWindow;
     MenuItem searchRecordingsMenuItem;
+    private EditText recordingNameEditText;
     private RadioButton checkedRadio;
     private File bookmarksToAddFile;
     private List<Bookmark> bookmarksToAddToExistingRecording = new ArrayList<>();
     private ConstraintLayout parentOfMenuItemClicked;
+    private File targetFileForNaming;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,26 +95,8 @@ public class RecordingsActivity extends BaseActivity implements SearchView.OnQue
         View contentView = inflater.inflate(R.layout.activity_recordings, null, false);
         mDrawer.addView(contentView, 1);
 
-
         onSharedIntent();
-
-        String folderPath = Objects.requireNonNull(getExternalFilesDir(null)).getAbsolutePath();
-        recordingsFolder = new File(folderPath);
-        recordings = new ArrayList<>();
-        List<File> recordingsFiles = new ArrayList<>(Arrays.asList(recordingsFolder.listFiles()));
-        for(File recordingFile : recordingsFiles ){
-            try {
-                if (!recordingFile.isDirectory()) {
-                Recording recording = new Recording(recordingFile.getName().substring(0,recordingFile.getName().indexOf(".")), recordingFile, Recording.fetchBookmarks(recordingFile));
-                recordings.add(recording);
-//                if(recording.getBookmarksList() != null){
-//                    recordings.addAll(recording.getBookmarksList());
-                }
-//                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        recordings = getRecordingsFromFolder();
 
         // set up the RecyclerView
         RecyclerView recyclerView = findViewById(R.id.recordingsLRecyclerView);
@@ -120,7 +110,6 @@ public class RecordingsActivity extends BaseActivity implements SearchView.OnQue
 //        adapter = new MyNewRecyclerViewAdapter(this, recordings);
 //        adapter.setClickListener(this);
         recyclerView.setAdapter(adapter);
-
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(), LinearLayout.VERTICAL);
         recyclerView.addItemDecoration(dividerItemDecoration); // TODO: 8/12/2019 Optional - decide if its better with/without
      //   searchBookmarkEditText = findViewById(R.id.search_by_bookmark);
@@ -162,6 +151,28 @@ public class RecordingsActivity extends BaseActivity implements SearchView.OnQue
 //            public void afterTextChanged(Editable editable) {
 //            }
 //        });
+    }
+
+    private List<Recording> getRecordingsFromFolder() {
+        String folderPath = Objects.requireNonNull(getExternalFilesDir(null)).getAbsolutePath();
+        recordingsFolder = new File(folderPath);
+        List<Recording> recordings = new ArrayList<>();
+        List<File> recordingsFiles = new ArrayList<>(Arrays.asList(recordingsFolder.listFiles()));
+        for(File recordingFile : recordingsFiles ){
+            try {
+                if (!recordingFile.isDirectory()) {
+                Recording recording = new Recording(recordingFile.getName().substring(0,recordingFile.getName().indexOf(".")), recordingFile, Recording.fetchBookmarks(recordingFile));
+                recordings.add(recording);
+//                if(recording.getBookmarksList() != null){
+//                    recordings.addAll(recording.getBookmarksList());
+                }
+//                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return recordings;
     }
 
     private List<Bookmark> JsonArrayToBookmarksList(JSONArray jsonArray) {
@@ -297,7 +308,7 @@ public class RecordingsActivity extends BaseActivity implements SearchView.OnQue
 
 
     public void onRadaioButtonClick(View view) {
-        String recordingName = ((TextView) ((ConstraintLayout) view.getParent()).getChildAt(1)).getText().toString() + ".m4a";
+        String recordingName = ((TextView) ((ConstraintLayout) view.getParent()).getChildAt(1)).getText().toString() + outputFormat;
         boolean toggleRadioButtonsToVisible = false;
 
         checkedRadio = (RadioButton) view;
@@ -378,7 +389,7 @@ public class RecordingsActivity extends BaseActivity implements SearchView.OnQue
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public boolean onMenuItemClick(MenuItem item) {
-        String recordingName = ((TextView) parentOfMenuItemClicked.getChildAt(1)).getText().toString() + ".m4a";
+        String recordingName = ((TextView) parentOfMenuItemClicked.getChildAt(1)).getText().toString() + outputFormat;
         String fileName = Objects.requireNonNull(getExternalFilesDir(null)).getAbsolutePath() + '/' + recordingName;
         String bookmarkDirectoryName = Objects.requireNonNull(getExternalFilesDir(null)).getAbsolutePath() + "/bookmarks";
         File file = new File(fileName);
@@ -395,33 +406,16 @@ public class RecordingsActivity extends BaseActivity implements SearchView.OnQue
             case R.id.recording_clicked_delete:
 //                Toast.makeText(this, "delete from recording row", Toast.LENGTH_LONG).show();
                 file.delete();
-                Recording deleted= null;
-
-                for(Recording recording : recordings){
-                    if(recording.getFile().equals(file) ){
-                        deleted = recording;
-                        break;
-                    }
-                }
-
-                if(deleted != null){
-                    recordings.remove(deleted);
-                }
-
+//                deleteRecording(file);
+                recordings = getRecordingsFromFolder();
                 adapter.updateList(recordings);
                 return true;
             case R.id.recording_clicked_edit:
-                Recording rec;
-                for(Recording recording : recordings){
-                    if(recording.getFile().equals(file) ){
-                        recordings.remove(recording);
-                    }
-                }
-                Toast.makeText(this, "edit from recording row", Toast.LENGTH_LONG).show();
+                targetFileForNaming = file;
+                onRecordingNaming(getWindow().getDecorView());
                 return true;
             case R.id.share_recording:
 //                    Uri uri = FileProvider.getUriForFile(getApplicationContext(),"com.mydomain.fileprovider", file);
-//
 //                    Uri uri = Uri.parse(fileName);
                 sendIntent.putExtra(Intent.EXTRA_STREAM, uri);
                 sendIntent.setType("audio/*");
@@ -499,7 +493,60 @@ public class RecordingsActivity extends BaseActivity implements SearchView.OnQue
         }
     }
 
+    private void deleteRecording(File file) {
+        Recording deleted= null;
 
+        for(Recording recording : recordings){
+            if(recording.getFile().equals(file) ){
+                deleted = recording;
+                break;
+            }
+        }
+
+        if(deleted != null){
+            recordings.remove(deleted);
+        }
+    }
+
+    public void onRecordingNaming(View view) {
+        // inflate the layout of the popup window
+        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+        renameRecordingView = inflater.inflate(R.layout.recording_naming_popup_from_recordings, null);
+
+        // create the popup window
+        int width = LinearLayout.LayoutParams.WRAP_CONTENT;
+        int height = LinearLayout.LayoutParams.WRAP_CONTENT;
+        boolean focusable = true; // lets taps outside the popup also dismiss it
+        nameRecordingPopupWindow = new PopupWindow(renameRecordingView, width, height, focusable);
+
+        // show the popup window
+        // which view you pass in doesn't matter, it is only used for the window tolken
+        nameRecordingPopupWindow.showAtLocation(view, Gravity.CENTER, 0, 0);
+
+        // dismiss the popup window when touched
+        renameRecordingView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                nameRecordingPopupWindow.dismiss();
+                return true;
+            }
+        });
+
+        recordingNameEditText = view.findViewById(R.id.add_recording_edit_text_from_recordings);
+    }
+
+    public void onRenameRecordingClick(View view) {
+        EditText recordingNameEditText = renameRecordingView.findViewById(R.id.add_recording_edit_text_from_recordings);
+        String recordingName = recordingNameEditText.getText().toString();
+
+        if(!recordingName.equals("") && targetFileForNaming.exists()){
+            File to = new File(targetFileForNaming.getPath().substring(0, targetFileForNaming.getPath().lastIndexOf("/")+1) + recordingName + outputFormat);
+            targetFileForNaming.renameTo(to);
+            nameRecordingPopupWindow.dismiss();
+            recordings = getRecordingsFromFolder();
+            adapter.updateList(recordings);
+        }
+    }
 
     private String copyFiletoExternalStorage() {
         String pathSDCard = Environment.getExternalStorageDirectory() + "/Android/data/" + "Recording 4.m4a";
@@ -592,7 +639,6 @@ public class RecordingsActivity extends BaseActivity implements SearchView.OnQue
                             if(selectedOrderRadioButton.getId() == R.id.descendingRadioButton){
                                 Collections.reverse(newList);
                             }
-                            Toast.makeText(getApplicationContext(), toastString, Toast.LENGTH_LONG).show();
                             adapter.updateList(newList);
                             dialog.cancel();
                         }

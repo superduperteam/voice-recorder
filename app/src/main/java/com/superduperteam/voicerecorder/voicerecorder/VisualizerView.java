@@ -9,6 +9,7 @@ import android.view.View;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -37,7 +38,7 @@ import java.util.List;
         protected void onSizeChanged(int w, int h, int oldw, int oldh) {
             width = w; // new width of this View
             height = h; // new height of this View
-            amplitudes = new ArrayList<Float>(width / LINE_WIDTH);
+            amplitudes = new ArrayList<>(width / LINE_WIDTH);
         }
 
         // clear all amplitudes to prepare for a new visualization
@@ -55,20 +56,29 @@ import java.util.List;
             }
         }
 
+        public void setAmplitudes(float[] amplitudes){
+            this.amplitudes = new ArrayList<>();
+
+            for(float amp : amplitudes){
+                this.amplitudes.add(amp);
+            }
+        }
+
 //         draw the visualizer with scaled lines representing the amplitudes
         @Override
         public void onDraw(Canvas canvas) {
             int middle = height / 2; // get the middle of the View
             float curX = 0; // start curX at zero
+            int count = 0;
 
             // for each item in the amplitudes ArrayList
             for (float power : amplitudes) {
+                count = 0;
                 float scaledHeight = power / LINE_SCALE; // scale the power
                 curX += LINE_WIDTH; // increase X by LINE_WIDTH
 
                 // draw a line representing this item in the amplitudes ArrayList
-                canvas.drawLine(curX, middle + scaledHeight / 2, curX, middle
-                        - scaledHeight / 2, linePaint);
+                canvas.drawLine(curX, middle + scaledHeight / 2, curX, middle - scaledHeight / 2, linePaint);
             }
         }
 

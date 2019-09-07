@@ -1,26 +1,21 @@
 package com.superduperteam.voicerecorder.voicerecorder.activities;
 
 import android.Manifest;
-import android.annotation.TargetApi;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Build;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.SystemClock;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 
@@ -34,25 +29,16 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.RemoteViews;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.superduperteam.voicerecorder.voicerecorder.BaseActivity;
 import com.superduperteam.voicerecorder.voicerecorder.R;
 import com.superduperteam.voicerecorder.voicerecorder.VisualizerView;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -73,9 +59,9 @@ public class MainActivity extends BaseActivity {
     private EditText bookmarkNameEditText;
     private EditText recordingNameEditText;
     private View addBookmarkView;
-    private View addRecordingView;
+    private View renameRecordingView;
     private PopupWindow addBookmarkPopupWindow;
-    private PopupWindow addRecordingPopupWindow;
+    private PopupWindow nameRecordingPopupWindow;
     private static final String STOP_RECORDING_ACTION = "stop";
     private static final String PAUSE_OR_RESUME_RECORDING_ACTION = "pauseOrResume";
     //voice recorder
@@ -143,7 +129,6 @@ public class MainActivity extends BaseActivity {
         actionReceiver = new ActionReceiver();
         registerReceiver(actionReceiver, new IntentFilter(STOP_RECORDING_ACTION));
         registerReceiver(actionReceiver, new IntentFilter(PAUSE_OR_RESUME_RECORDING_ACTION));
-
     }
 
     // updates the visualizer every 50 milliseconds
@@ -211,14 +196,16 @@ public class MainActivity extends BaseActivity {
             @Override
             public void onChronometerTick(Chronometer chronometerChanged) {
                 chronometer = chronometerChanged;
-                TextView time = findViewById(R.id.notification_recording_time);
-                if(time != null){
-                    time.setText(chronometerChanged.getText());
+//                TextView time = findViewById(R.id.notification_recording_time);
+                TextView status = findViewById(R.id.notification_recording_time);
+                if(status != null){
+                    status.setText(chronometerChanged.getText());
                 }
 
                 if(nPanel != null){
                     if(nPanel.getRemoteView() != null){
-                        nPanel.getRemoteView().setTextViewText(R.id.notification_recording_time, chronometerChanged.getText());
+//                        nPanel.getRemoteView().setTextViewText(R.id.notification_recording_time, chronometerChanged.getText());
+//                        nPanel.getRemoteView().setTextViewText(R.id.notification_recording_time, chronometerChanged.getText());
 
                         // update the notification
 //                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
@@ -244,19 +231,36 @@ public class MainActivity extends BaseActivity {
     private boolean isRunning = false;
 
     public void onRecordClick(View view) {
-
+        ImageButton remoteButton = findViewById(R.id.notification_pause_resume_button);
         if (!isRecording) {
             //startStopWatch(isFirstStart);
             findViewById(R.id.record_button).setBackgroundResource(R.drawable.ic_pause_circle_filled_black_24dp);
 
+
+            if(nPanel != null){
+                nPanel.getRemoteView().setInt(R.id.notification_pause_resume_button, "setBackgroundResource",R.drawable.ic_pause_circle_filled_black_24dp);
+                nPanel.getRemoteView().setTextViewText(R.id.notification_recording_time, "Recording");
+                nPanel.getNotificationManager().notify(2, nPanel.getNotificationBuilder().build());
+            }
+
+
             startStopWatch();
             startRecording(isRunning);
-            nPanel = new NotificationPanel(this);
+            if(nPanel == null){
+                nPanel = new NotificationPanel(this);
+            }
 //            notificationTest();
 
             isRunning = true;
         } else {
             findViewById(R.id.record_button).setBackgroundResource(R.drawable.ic_record_button);
+
+            if(nPanel != null){
+                nPanel.getRemoteView().setInt(R.id.notification_pause_resume_button,"setBackgroundResource" ,R.drawable.ic_record_button);
+                nPanel.getRemoteView().setTextViewText(R.id.notification_recording_time, "Paused");
+                nPanel.getNotificationManager().notify(2, nPanel.getNotificationBuilder().build());
+            }
+
             pauseStopWatch();
             pauseRecording();
         }
@@ -296,6 +300,9 @@ public class MainActivity extends BaseActivity {
             if(nPanel != null){
                 nPanel.notificationCancel();
             }
+            nPanel = null;
+
+
             isRunning = false;
             isRecording = false;
             //stopStopWatch();
@@ -511,23 +518,23 @@ private long pauseOffset = 0;
 
         // inflate the layout of the popup window
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-        addRecordingView = inflater.inflate(R.layout.recording_naming_popup, null);
+        renameRecordingView = inflater.inflate(R.layout.recording_naming_popup, null);
 
         // create the popup window
         int width = LinearLayout.LayoutParams.WRAP_CONTENT;
         int height = LinearLayout.LayoutParams.WRAP_CONTENT;
         boolean focusable = true; // lets taps outside the popup also dismiss it
-        addRecordingPopupWindow = new PopupWindow(addRecordingView, width, height, focusable);
+        nameRecordingPopupWindow = new PopupWindow(renameRecordingView, width, height, focusable);
 
         // show the popup window
         // which view you pass in doesn't matter, it is only used for the window tolken
-        addRecordingPopupWindow.showAtLocation(view, Gravity.CENTER, 0, 0);
+        nameRecordingPopupWindow.showAtLocation(view, Gravity.CENTER, 0, 0);
 
         // dismiss the popup window when touched
-        addRecordingView.setOnTouchListener(new View.OnTouchListener() {
+        renameRecordingView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                addRecordingPopupWindow.dismiss();
+                nameRecordingPopupWindow.dismiss();
                 return true;
             }
         });
@@ -536,46 +543,26 @@ private long pauseOffset = 0;
     }
 
     public void onNameRecordingClick(View view) {
-        recordingNameEditText = addRecordingView.findViewById(R.id.add_recording_edit_text);
+        recordingNameEditText = renameRecordingView.findViewById(R.id.add_recording_edit_text);
         String recordingName = recordingNameEditText.getText().toString();
 //        System.out.println(recordingName + "1234");
 
-
-        File sdcard = Environment.getExternalStorageDirectory();
-        File from = new File(lastRecordingPath);
-        File to = new File(lastRecordingPath.substring(0, lastRecordingPath.lastIndexOf("/")+1) + recordingName + outputFormat);
+        if(!recordingName.equals("")){
+            File sdcard = Environment.getExternalStorageDirectory();
+            File from = new File(lastRecordingPath);
+            File to = new File(lastRecordingPath.substring(0, lastRecordingPath.lastIndexOf("/")+1) + recordingName + outputFormat);
 //        try {
 //            copy(from, to);
 //            from.delete();
 //        } catch (IOException e) {
 //            e.printStackTrace();
 //        }
-        System.out.println(from.renameTo(to) + "^^^^^^");
+            System.out.println(from.renameTo(to));
 
 //        bookmarksList.add(new Bookmark(elapsedTime, bookmarkName));
-        addRecordingPopupWindow.dismiss();
-    }
-
-
-    private static void copy(File src, File dst) throws IOException {
-        InputStream in = new FileInputStream(src);
-        try {
-            OutputStream out = new FileOutputStream(dst);
-            try {
-                // Transfer bytes from in to out
-                byte[] buf = new byte[1024];
-                int len;
-                while ((len = in.read(buf)) > 0) {
-                    out.write(buf, 0, len);
-                }
-            } finally {
-                out.close();
-            }
-        } finally {
-            in.close();
+            nameRecordingPopupWindow.dismiss();
         }
     }
-
 
     public void onButtonShowPopupWindowClick(View view) {
 

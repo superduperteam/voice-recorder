@@ -161,9 +161,7 @@ public class RecordingsAdapter extends CustomExpandableRecyclerViewAdapter<Recor
         System.out.print("Minutes and seconds: ");
         System.out.println(minutes);
         System.out.println(seconds);
-        return String.format("%s:%s",
-                minutes, seconds
-        );
+        return String.format("%s:%s", minutes, seconds);
     }
 
     public void updateList(List<Recording> groups) {
@@ -399,6 +397,11 @@ public class RecordingsAdapter extends CustomExpandableRecyclerViewAdapter<Recor
 //              } else {
 //                  expand();
 //              }
+
+          player.reset();
+          recordingToResumePosition = -1;
+          shouldSetDataSource = true;
+          playButton.setBackgroundResource(R.drawable.ic_play_arrow_triangle_alt1);
 
           Recording recording = getItem(getAdapterPosition());
           createIntentForRecordingPlayer(0, recording);

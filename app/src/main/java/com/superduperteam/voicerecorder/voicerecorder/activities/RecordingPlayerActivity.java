@@ -9,7 +9,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
+import android.media.audiofx.Visualizer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -17,20 +19,29 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.gauravk.audiovisualizer.visualizer.BarVisualizer;
+import com.gauravk.audiovisualizer.visualizer.CircleLineVisualizer;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.superduperteam.voicerecorder.voicerecorder.BaseActivity;
 import com.superduperteam.voicerecorder.voicerecorder.R;
+import com.superduperteam.voicerecorder.voicerecorder.VisualizerView;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 public class RecordingPlayerActivity extends BaseActivity implements BookmarkClickedListener {
     private Recording recording;
+    private float speed = 1f;
     private static final String LOG_TAG = "AudioRecordTest";
     private ImageButton playButton;
     volatile SeekBar seekBar;
+    private CircleLineVisualizer mVisualizer;
+    private Handler handler;
+    private VisualizerView visualizer;
     FloatingActionButton fab;
     private BookmarksRecyclerViewAdapter adapter;
     volatile MediaPlayer mediaPlayer = new MediaPlayer();
@@ -40,6 +51,7 @@ public class RecordingPlayerActivity extends BaseActivity implements BookmarkCli
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
 
 //        setContentView(R.layout.activity_recording_player);
         LayoutInflater inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -96,12 +108,13 @@ public class RecordingPlayerActivity extends BaseActivity implements BookmarkCli
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromTouch) {
                     seekBarHint.setVisibility(View.VISIBLE);
-                    int x = (int) Math.ceil(progress / 1000f);
-
-                    if (x < 10)
-                        seekBarHint.setText("0:0" + x);
-                    else
-                        seekBarHint.setText("0:" + x);
+//                    int x = (int) Math.ceil(progress / 1000f);
+//
+//                    if (x < 10)
+//                        seekBarHint.setText("0:0" + x);
+//                    else
+//                        seekBarHint.setText("0:" + x);
+                seekBarHint.setText(convertMilliSecondsToRecordingTime((int) Math.ceil(progress)));
 
                     double percent = progress / (double) seekBar.getMax();
                     int offset = seekBar.getThumbOffset();
@@ -124,8 +137,37 @@ public class RecordingPlayerActivity extends BaseActivity implements BookmarkCli
             }
         });
 
+
+
+
+        //get reference to visualizer
+        mVisualizer = findViewById(R.id.circle_line_visualizer);
+
+
         playRecording(timestampStart);
     }
+
+
+    private String convertMilliSecondsToRecordingTime(long milliseconds) {
+        String minutes = Long.toString(TimeUnit.MILLISECONDS.toMinutes(milliseconds));
+        String seconds = Long.toString(TimeUnit.MILLISECONDS.toSeconds(milliseconds) -
+                TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(milliseconds)));
+
+        if(TimeUnit.MILLISECONDS.toMinutes(milliseconds) < 10) {
+            minutes = "0" + minutes;
+        }
+
+        if(TimeUnit.MILLISECONDS.toSeconds(milliseconds) -
+                TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(milliseconds)) < 10) {
+            seconds = "0" + seconds;
+        }
+        System.out.print("Minutes and seconds: ");
+        System.out.println(minutes);
+        System.out.println(seconds);
+        return String.format("%s:%s", minutes, seconds);
+    }
+
+
 
     public void onPlayButtonClick(View v){
         if(mediaPlayer.isPlaying()){
@@ -159,8 +201,25 @@ public class RecordingPlayerActivity extends BaseActivity implements BookmarkCli
                     mediaPlayer.start();
                 });
                 mediaPlayer.prepare();
+                TextView durationTextView = findViewById(R.id.recording_duration_in_recordings_player);
+
 //                mediaPlayer.setVolume(0.5f, 0.5f);
                 mediaPlayer.start();
+
+
+                MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+                mmr.setDataSource(recording.getFile().getPath());
+                String recordingDuration = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+                durationTextView.setText(convertMilliSecondsToRecordingTime(Long.valueOf(recordingDuration)));
+
+                //TODO: init MediaPlayer and play the audio
+
+                //get the AudioSessionId from your MediaPlayer and pass it to the visualizer
+                int audioSessionId = mediaPlayer.getAudioSessionId();
+                if (audioSessionId != -1){
+                    mVisualizer.setAudioSessionId(audioSessionId);
+                }
+
                 mediaPlayer.seekTo(timestampStart);
                 mediaPlayer.setLooping(false);
                 seekBar.setMax(mediaPlayer.getDuration());
@@ -190,6 +249,9 @@ public class RecordingPlayerActivity extends BaseActivity implements BookmarkCli
         mediaPlayer.release();
         mediaPlayer = null;
         mHandler.removeCallbacks(mUpdateSeekbar);
+
+        if (mVisualizer != null)
+            mVisualizer.release();
     }
 
     @Override
@@ -198,6 +260,18 @@ public class RecordingPlayerActivity extends BaseActivity implements BookmarkCli
             seekBar.setProgress(time);
             mediaPlayer.seekTo(time);
         }
+    }
+
+    public void onSpeedUpClick(View view) {
+        speed = Math.min(speed + 0.2f,2f);
+        mediaPlayer.setPlaybackParams(mediaPlayer.getPlaybackParams().setSpeed(speed));
+        Toast.makeText(getApplicationContext(),"Speed: "+ String.valueOf((float)Math.round(speed * 100000d) / 100000d).substring(0,String.valueOf(speed).indexOf(".")+2), Toast.LENGTH_SHORT).show();
+    }
+
+    public void onSpeedDownClick(View view) {
+        speed = Math.max(speed - 0.2f,0.2f);
+        mediaPlayer.setPlaybackParams(mediaPlayer.getPlaybackParams().setSpeed(speed));
+        Toast.makeText(getApplicationContext(), "Speed: "+ String.valueOf((float)Math.round(speed * 100000d) / 100000d).substring(0,String.valueOf(speed).indexOf(".")+2), Toast.LENGTH_SHORT).show();
     }
 
 //    private void pauseMediaPlayer() {
