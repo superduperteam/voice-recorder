@@ -103,25 +103,28 @@ public class RecordingsAdapter extends CustomExpandableRecyclerViewAdapter<Recor
   @Override
   public void onBindGroupViewHolder(RecordingViewHolder holder, int flatPosition, ExpandableGroup group) {
 
-      String recordingName = getItem(flatPosition).getTitle();
-      String recordingDuration;
-      long recordingDurationMilliseconds;
-      String recordingDate;
+        if(getItem(flatPosition) != null){
+            String recordingName = getItem(flatPosition).getTitle();
+            String recordingDuration;
+            long recordingDurationMilliseconds;
+            String recordingDate;
 
-      mmr.setDataSource(getItem(flatPosition).getFile().getPath());
-      recordingDuration = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
-      recordingDurationMilliseconds = Long.parseLong(recordingDuration);
-      recordingDuration = convertMilliSecondsToRecordingTime(recordingDurationMilliseconds);
-      recordingDate = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DATE);
-      recordingDate = extractDateFromMetaDataDate(recordingDate);
+            mmr.setDataSource(getItem(flatPosition).getFile().getPath());
+            recordingDuration = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+            recordingDurationMilliseconds = Long.parseLong(recordingDuration);
+            recordingDuration = convertMilliSecondsToRecordingTime(recordingDurationMilliseconds);
+            recordingDate = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DATE);
+            recordingDate = extractDateFromMetaDataDate(recordingDate);
 
-      holder.recordingDate.setText(recordingDate);
-      holder.recordingDurationTextView.setText(recordingDuration);
-      holder.recordingNameTextView.setText(recordingName);
-      holder.recordingBookmarksCount.setText(String.valueOf(group.getItemCount()));
+            holder.recordingDate.setText(recordingDate);
+            holder.recordingDurationTextView.setText(recordingDuration);
+            holder.recordingNameTextView.setText(recordingName);
+            holder.recordingBookmarksCount.setText(String.valueOf(group.getItemCount()));
 
-      holder.setRecordingTitle(group);
-  }
+            holder.setRecordingTitle(group);
+
+        }
+        }
 
     private final static int YEAR_START_INDEX = 0;
     private final static int YEAR_END_INDEX = 4;
