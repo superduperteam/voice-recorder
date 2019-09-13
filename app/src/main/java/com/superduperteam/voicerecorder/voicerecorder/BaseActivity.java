@@ -60,10 +60,10 @@ public class BaseActivity extends AppCompatActivity {
                                 intent = new Intent(BaseActivity.this, RecordingsActivity.class);
                                 startActivity(intent);
                                 break;
-                            case R.id.nav_weekly_notifications:
-                                intent = new Intent(BaseActivity.this, WeeklyNotificationsActivity.class);
-                                startActivity(intent);
-                                break;
+//                            case R.id.nav_weekly_notifications:
+//                                intent = new Intent(BaseActivity.this, WeeklyNotificationsActivity.class);
+//                                startActivity(intent);
+//                                break;
                             case R.id.nav_settings:
                                 intent = new Intent(BaseActivity.this, SettingsActivity.class);
                                 startActivity(intent);
