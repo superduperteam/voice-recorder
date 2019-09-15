@@ -269,18 +269,40 @@ public class MainActivity extends BaseActivity {
     }
 
     @Override
-    public void onDestroy() {
+    protected void onPause() {
         if(recorder != null) {
             try {
-                recorder.stop();
-            } finally {
-                recorder.release();
-                recorder = null;
+                onStopClick(null);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
         try{
             if(actionReceiver!=null)
                 unregisterReceiver(actionReceiver);
+            if(nPanel != null){
+                nPanel.notificationCancel();
+            }
+
+        }catch(Exception e){}
+        super.onPause();
+    }
+
+    @Override
+    public void onDestroy() {
+        if(recorder != null) {
+            try {
+                onStopClick(null);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        try{
+            if(actionReceiver!=null)
+                unregisterReceiver(actionReceiver);
+            if(nPanel != null){
+                nPanel.notificationCancel();
+            }
 
         }catch(Exception e){}
 

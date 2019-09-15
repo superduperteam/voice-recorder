@@ -30,7 +30,10 @@ public class MetaDataRead {
         IsoFile isoFile = new IsoFile(new FileDataSourceImpl(new FileInputStream(videoFilePath).getChannel()));
 
         AppleNameBox nam = Path.getPath(isoFile, "/moov[0]/udta[0]/meta[0]/ilst/©nam");
-        String xml = nam.getValue();
+        String xml = "";
+        if(nam != null){
+            xml = nam.getValue();
+        }
         isoFile.close();
         return xml;
     }
