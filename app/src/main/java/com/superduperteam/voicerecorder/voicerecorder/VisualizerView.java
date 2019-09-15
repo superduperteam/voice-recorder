@@ -18,7 +18,7 @@ import java.util.List;
 
     public class VisualizerView extends View {
         private static final int LINE_WIDTH = 1; // width of visualizer lines
-        private static final int LINE_SCALE = 13; // scales visualizer lines
+        private static final int LINE_SCALE = 25; // scales visualizer lines
         private List<Float> amplitudes; // amplitudes for line lengths
         private int width; // width of this View
         private int height; // height of this View
