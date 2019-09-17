@@ -386,7 +386,6 @@ public class RecordingsActivity extends BaseActivity implements SearchView.OnQue
             nameRecordingPopupWindow.dismiss();
             return true;
         });
-
        }
 
     public void onRenameRecordingClick(View view) {
