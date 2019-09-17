@@ -382,12 +382,9 @@ public class RecordingsActivity extends BaseActivity implements SearchView.OnQue
         nameRecordingPopupWindow.showAtLocation(view, Gravity.CENTER, 0, 0);
 
         // dismiss the popup window when touched
-        renameRecordingView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                nameRecordingPopupWindow.dismiss();
-                return true;
-            }
+        renameRecordingView.setOnTouchListener((v, event) -> {
+            nameRecordingPopupWindow.dismiss();
+            return true;
         });
 
        }
