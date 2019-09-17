@@ -1,4 +1,4 @@
-package com.superduperteam.voicerecorder.voicerecorder.activities;
+package com.superduperteam.voicerecorder.voicerecorder.Activities.RecordingPlayerActivity;
 
 import android.content.Context;
 
@@ -11,7 +11,6 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
-import android.media.audiofx.Visualizer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -21,12 +20,14 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.gauravk.audiovisualizer.visualizer.BarVisualizer;
 import com.gauravk.audiovisualizer.visualizer.CircleLineVisualizer;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.superduperteam.voicerecorder.voicerecorder.BaseActivity;
+import com.superduperteam.voicerecorder.voicerecorder.Activities.BaseActivity.BaseActivity;
 import com.superduperteam.voicerecorder.voicerecorder.R;
-import com.superduperteam.voicerecorder.voicerecorder.VisualizerView;
+import com.superduperteam.voicerecorder.voicerecorder.Visualizer.VisualizerView;
+import com.superduperteam.voicerecorder.voicerecorder.Interfaces.BookmarkClickedListener;
+import com.superduperteam.voicerecorder.voicerecorder.Adapters.BookmarksRecyclerViewAdapter;
+import com.superduperteam.voicerecorder.voicerecorder.Model.Recording;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,10 +41,6 @@ public class RecordingPlayerActivity extends BaseActivity implements BookmarkCli
     private ImageButton playButton;
     volatile SeekBar seekBar;
     private CircleLineVisualizer mVisualizer;
-    private Handler handler;
-    private VisualizerView visualizer;
-    FloatingActionButton fab;
-    private BookmarksRecyclerViewAdapter adapter;
     volatile MediaPlayer mediaPlayer = new MediaPlayer();
     boolean wasPlaying = false;
     private Handler mHandler = new Handler();
@@ -51,9 +48,6 @@ public class RecordingPlayerActivity extends BaseActivity implements BookmarkCli
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-
-//        setContentView(R.layout.activity_recording_player);
         LayoutInflater inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         //inflate your activity layout here!
@@ -83,22 +77,15 @@ public class RecordingPlayerActivity extends BaseActivity implements BookmarkCli
         if (animator instanceof DefaultItemAnimator) {
             ((DefaultItemAnimator) animator).setSupportsChangeAnimations(false);
         }
-        adapter = new BookmarksRecyclerViewAdapter(this, new ArrayList<>(recording.getBookmarksList()), recyclerView, this);
-        recyclerView.setAdapter(adapter);
 
+        BookmarksRecyclerViewAdapter adapter = new BookmarksRecyclerViewAdapter(this, new ArrayList<>(recording.getBookmarksList()), recyclerView, this);
+        recyclerView.setAdapter(adapter);
         final TextView seekBarHint = findViewById(R.id.textView);
         seekBar = findViewById(R.id.seekbar);
         seekBar.getThumb().setColorFilter(Color.BLACK, PorterDuff.Mode.MULTIPLY);
         seekBar.getThumb().setColorFilter(Color.BLACK, PorterDuff.Mode.SRC_IN);
         seekBar.setProgress(timestampStart);
         playButton = findViewById(R.id.recordingPlayerPlay);
-//        playButton.setBackgroundResource(R.drawable.ic_pause_circle_outline_black_24dp);
-
-
-//        mediaPlayer.setOnCompletionListener(mediaPlayer -> {
-//            mediaPlayer.reset();
-//            playButton.setBackgroundResource(R.drawable.ic_play_arrow_triangle_alt1);
-//        });
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
@@ -108,12 +95,7 @@ public class RecordingPlayerActivity extends BaseActivity implements BookmarkCli
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromTouch) {
                     seekBarHint.setVisibility(View.VISIBLE);
-//                    int x = (int) Math.ceil(progress / 1000f);
-//
-//                    if (x < 10)
-//                        seekBarHint.setText("0:0" + x);
-//                    else
-//                        seekBarHint.setText("0:" + x);
+
                 seekBarHint.setText(convertMilliSecondsToRecordingTime((int) Math.ceil(progress)));
 
                     double percent = progress / (double) seekBar.getMax();
@@ -122,11 +104,6 @@ public class RecordingPlayerActivity extends BaseActivity implements BookmarkCli
                     int val = (int) Math.round(percent * (seekWidth - 2 * offset));
                     int labelWidth = seekBarHint.getWidth();
                     seekBarHint.setX(offset + seekBar.getX() + val - Math.round(percent * offset) - Math.round(percent * labelWidth / 2));
-//                if (progress > 0 && mediaPlayer != null && !mediaPlayer.isPlaying()) {
-////                    clearMediaPlayer();
-////                    fab.setImageDrawable(ContextCompat.getDrawable(RecordingPlayerActivity.this, android.R.drawable.ic_media_play));
-//                    RecordingPlayerActivity.this.seekBar.setProgress(0);
-//                }
             }
 
             @Override
@@ -137,13 +114,8 @@ public class RecordingPlayerActivity extends BaseActivity implements BookmarkCli
             }
         });
 
-
-
-
         //get reference to visualizer
         mVisualizer = findViewById(R.id.circle_line_visualizer);
-
-
         playRecording(timestampStart);
     }
 
@@ -167,8 +139,6 @@ public class RecordingPlayerActivity extends BaseActivity implements BookmarkCli
         return String.format("%s:%s", minutes, seconds);
     }
 
-
-
     public void onPlayButtonClick(View v){
         if(mediaPlayer.isPlaying()){
             mediaPlayer.pause();
@@ -184,12 +154,6 @@ public class RecordingPlayerActivity extends BaseActivity implements BookmarkCli
 
     public void playRecording(int timestampStart) {
         try {
-//            if (mediaPlayer != null && mediaPlayer.isPlaying()) {
-//                pauseMediaPlayer();
-//                seekBar.setProgress(0);
-//                wasPlaying = true;
-//                playButton.setBackgroundResource(R.drawable.ic_play_arrow_triangle_alt1);
-//            }
             if (!wasPlaying) {
                 if (mediaPlayer == null) {
                     mediaPlayer = new MediaPlayer();
@@ -197,16 +161,10 @@ public class RecordingPlayerActivity extends BaseActivity implements BookmarkCli
 
                 playButton.setBackgroundResource(R.drawable.ic_pause_circle_outline_black_24dp);
                 mediaPlayer.setDataSource(recording.getFile().getPath());
-                mediaPlayer.setOnCompletionListener(mediaPlayer -> {
-                    mediaPlayer.start();
-                });
+                mediaPlayer.setOnCompletionListener(MediaPlayer::start);
                 mediaPlayer.prepare();
                 TextView durationTextView = findViewById(R.id.recording_duration_in_recordings_player);
-
-//                mediaPlayer.setVolume(0.5f, 0.5f);
                 mediaPlayer.start();
-
-
                 MediaMetadataRetriever mmr = new MediaMetadataRetriever();
                 mmr.setDataSource(recording.getFile().getPath());
                 String recordingDuration = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
@@ -273,93 +231,4 @@ public class RecordingPlayerActivity extends BaseActivity implements BookmarkCli
         mediaPlayer.setPlaybackParams(mediaPlayer.getPlaybackParams().setSpeed(speed));
         Toast.makeText(getApplicationContext(), "Speed: "+ String.valueOf((float)Math.round(speed * 100000d) / 100000d).substring(0,String.valueOf(speed).indexOf(".")+2), Toast.LENGTH_SHORT).show();
     }
-
-//    private void pauseMediaPlayer() {
-//        mediaPlayer.pause();
-//    }
-
-
-//    class seekBarUpdater implements Runnable{
-//        @Override
-//        public void run() {
-//                int currentPosition = mediaPlayer.getCurrentPosition();
-//                int total = mediaPlayer.getDuration();
-//
-//                while (mediaPlayer != null && currentPosition < total) {
-//                    try {
-//                        currentPosition = mediaPlayer.getCurrentPosition();
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                    }
-//
-//                synchronized (seekBar){
-//                    seekBar.setProgress(currentPosition);
-//                }
-//                    try {
-//                        Thread.sleep(1000);
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//        }
-//    }
-
-//    private Handler mHandler = new Handler();
-////Make sure you update Seekbar on UI thread
-//    RecordingPlayerActivity.this.runOnUiThread(new Runnable() {
-//
-//        @Override
-//        public void run() {
-//            if(mMediaPlayer != null){
-//                int mCurrentPosition = mMediaPlayer.getCurrentPosition() / 1000;
-//                mSeekBar.setProgress(mCurrentPosition);
-//            }
-//            mHandler.postDelayed(this, 1000);
-//        }
-//    });
-
-
-
-//    private void startPlaying() throws IOException {
-//        try {
-//            player.setDataSource(recording.getFile().getPath());
-//            player.prepare();
-//            player.start();
-//            System.out.print("duration: ");
-//            System.out.println(player.getDuration());
-//        } catch (IOException e) {
-//            Log.e(LOG_TAG, "prepare() failed");
-//        }
-//
-//
-//        System.out.println(recording.getBookmarksList());
-//    }
-
-// This is for the buttons in the top: search and sort
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        MenuInflater inflater = getMenuInflater();
-//        inflater.inflate(R.menu.menu_recordings, menu);
-//        MenuItem mMenuItem = menu.findItem(R.id.app_bar_search);
-//
-//        ActionBar actionbar = getSupportActionBar();
-//        actionbar.setDisplayHomeAsUpEnabled(true);
-//        actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
-////        mMenuItem.setVisible(false);
-////        mMenuItem.setTitle("Deleteeeee");
-////        mMenuItem.setEnabled(false);
-//        return super.onCreateOptionsMenu(menu);
-//    }
-
-//    private MenuItem mMenuItem;
-
-//    @Override
-//    public boolean onPrepareOptionsMenu(Menu menu) {
-//
-//        invalidateOptionsMenu();
-//        menu.findItem(R.id.app_bar_search).setVisible(false);
-//        menu.findItem(R.id.app_bar_search).setVisible(true);
-//        return super.onPrepareOptionsMenu(menu);
-//    }
-
 }

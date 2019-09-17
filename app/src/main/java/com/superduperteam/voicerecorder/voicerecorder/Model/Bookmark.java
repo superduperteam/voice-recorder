@@ -1,4 +1,4 @@
-package com.superduperteam.voicerecorder.voicerecorder.activities;
+package com.superduperteam.voicerecorder.voicerecorder.Model;
 
 import android.graphics.Typeface;
 import android.os.Parcel;
@@ -6,7 +6,6 @@ import android.os.Parcelable;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
-import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 
 import org.json.JSONException;
@@ -35,11 +34,6 @@ public class Bookmark implements Parcelable {
         this.recordingFile = recordingFile;
     }
 
-    public Bookmark(Long timestamp, String text, Recording recording) {
-        this.timestamp = timestamp;
-        this.text = new SpannableString(text);
-        this.recording = recording;
-    }
 
     protected Bookmark(Parcel in) {
         text = new SpannableString(in.readString());
@@ -93,14 +87,6 @@ public class Bookmark implements Parcelable {
     public Spannable getTitle() {
         return text;
     }
-
-//    public File getFile() {
-//        if(recording != null){
-//            return recording.getFile();
-//        }
-//
-//        return null;
-//    }
 
     @Override
     public int describeContents() {

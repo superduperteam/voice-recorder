@@ -1,4 +1,4 @@
-package com.superduperteam.voicerecorder.voicerecorder;
+package com.superduperteam.voicerecorder.voicerecorder.Visualizer;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -11,10 +11,6 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-
-// taken from: https://stackoverflow.com/questions/14295427/android-audio-recording-with-voice-level-visualization/34551064#34551064
-// first answer
 
     public class VisualizerView extends View {
         private static final int LINE_WIDTH = 1; // width of visualizer lines
@@ -69,11 +65,9 @@ import java.util.List;
         public void onDraw(Canvas canvas) {
             int middle = height / 2; // get the middle of the View
             float curX = 0; // start curX at zero
-            int count = 0;
 
             // for each item in the amplitudes ArrayList
             for (float power : amplitudes) {
-                count = 0;
                 float scaledHeight = power / LINE_SCALE; // scale the power
                 curX += LINE_WIDTH; // increase X by LINE_WIDTH
 
@@ -81,38 +75,4 @@ import java.util.List;
                 canvas.drawLine(curX, middle + scaledHeight / 2, curX, middle - scaledHeight / 2, linePaint);
             }
         }
-
-//        public static byte floatToByteArray(float value) {
-//            int intBits =  Float.floatToIntBits(value);
-//            return (byte) (intBits >> 24);
-//        }
-
-//        Paint middleLine = new Paint();
-//        @Override
-//        protected void onDraw(Canvas canvas) {
-//            if (amplitudes.size() != 0) {
-//                middleLine.setColor(Color.RED);
-//                int density = 70;
-//                int gap = 4;
-//                float barWidth = getWidth() / density;
-//                float div = amplitudes.size() / density;
-//                canvas.drawLine(0, getHeight() / 2, getWidth(), getHeight() / 2, middleLine);
-//                linePaint.setStrokeWidth(barWidth - 4);
-//
-//                for(byte amp : amplitudes){
-//                    for (int i = 0; i < density; i++) {
-//                        int bytePosition = (int) Math.ceil(i * div);
-//                        int top = getHeight() / 2 + (128 - Math.abs(amplitudes.get(bytePosition))) * (getHeight() / 2) / 128;
-//
-//                        int bottom = getHeight() / 2 - (128 - Math.abs(amplitudes.get(bytePosition))) * (getHeight() / 2) / 128;
-//
-//                        float barX = (i * barWidth) + (barWidth / 2);
-//                        canvas.drawLine(barX, bottom, barX, getHeight() / 2, linePaint);
-//                        canvas.drawLine(barX, top, barX, getHeight() / 2, linePaint);
-//                    }
-//                }
-//                super.onDraw(canvas);
-//            }
-//        }
-
     }

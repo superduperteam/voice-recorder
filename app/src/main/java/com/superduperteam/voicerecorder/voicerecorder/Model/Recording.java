@@ -1,9 +1,7 @@
-package com.superduperteam.voicerecorder.voicerecorder.activities;
+package com.superduperteam.voicerecorder.voicerecorder.Model;
 
-import com.alamkanak.weekview.WeekView;
-import com.superduperteam.voicerecorder.voicerecorder.R;
+import com.superduperteam.voicerecorder.voicerecorder.Utills.MetaDataRead;
 import com.thoughtbot.expandablerecyclerview.models.ExpandableGroup;
-import com.thoughtbot.expandablerecyclerview.models.ExpandableList;
 
 import java.io.File;
 import java.io.IOException;

@@ -28,19 +28,19 @@
         </provider>
 
         <activity
-            android:name=".BaseActivity"
+            android:name=".Activities.BaseActivity.BaseActivity"
             android:label="@string/title_activity_base"
             android:screenOrientation="portrait"
             android:theme="@style/ThemeOverlay.AppCompat.ActionBar">
         </activity>
 
-        <activity android:name=".activities.RecordingPlayerActivity"
+        <activity android:name=".Activities.RecordingPlayerActivity.RecordingPlayerActivity"
             android:screenOrientation="portrait"/>
         <activity
-            android:name=".activities.settingsActivity.SettingsActivity"
+            android:name=".Activities.SettingsActivity.SettingsActivity"
             android:screenOrientation="portrait"
             android:label="@string/title_activity_settings" />
-        <activity android:name=".activities.MainActivity"
+        <activity android:name=".Activities.MainActivity.MainActivity"
             android:screenOrientation="portrait"
             >
             <intent-filter>
@@ -49,7 +49,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.RecordingsActivity"
+        <activity android:name=".Activities.RecordingsActivity.RecordingsActivity"
             android:screenOrientation="portrait">
 
             <intent-filter>

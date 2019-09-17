@@ -6,14 +6,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context=".activities.RecordingPlayerActivity"
+    tools:context=".Activities.RecordingPlayerActivity.RecordingPlayerActivity"
     android:orientation="vertical">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            tools:context=".activities.RecordingPlayerActivity">
+            tools:context=".Activities.RecordingPlayerActivity.RecordingPlayerActivity">
 
             <!--            <View-->
 <!--                android:id="@+id/view"-->

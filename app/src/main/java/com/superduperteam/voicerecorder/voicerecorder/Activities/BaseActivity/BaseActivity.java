@@ -1,4 +1,4 @@
-package com.superduperteam.voicerecorder.voicerecorder;
+package com.superduperteam.voicerecorder.voicerecorder.Activities.BaseActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,10 +13,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 
-import com.superduperteam.voicerecorder.voicerecorder.activities.MainActivity;
-import com.superduperteam.voicerecorder.voicerecorder.activities.RecordingsActivity;
-import com.superduperteam.voicerecorder.voicerecorder.activities.WeeklyNotificationsActivity;
-import com.superduperteam.voicerecorder.voicerecorder.activities.settingsActivity.SettingsActivity;
+import com.superduperteam.voicerecorder.voicerecorder.R;
+import com.superduperteam.voicerecorder.voicerecorder.Activities.MainActivity.MainActivity;
+import com.superduperteam.voicerecorder.voicerecorder.Activities.RecordingsActivity.RecordingsActivity;
+import com.superduperteam.voicerecorder.voicerecorder.Activities.SettingsActivity.SettingsActivity;
 
 public class BaseActivity extends AppCompatActivity {
 
@@ -28,7 +28,7 @@ public class BaseActivity extends AppCompatActivity {
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_base);
 
-        mDrawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawer = findViewById(R.id.drawer_layout);
 
         //This is about creating custom listview for navigate drawer
         //Implementation for NavigateDrawer HERE !
@@ -44,40 +44,33 @@ public class BaseActivity extends AppCompatActivity {
 
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(
-                new NavigationView.OnNavigationItemSelectedListener() {
-                    @Override
-                    public boolean onNavigationItemSelected(MenuItem menuItem) {
-                        // set item as selected to persist highlight
-                        int id = menuItem.getItemId();
-                        Intent intent;
+                menuItem -> {
+                    // set item as selected to persist highlight
+                    int id = menuItem.getItemId();
+                    Intent intent;
 
-                        switch (id) {
-                            case R.id.nav_recorder:
-                                intent = new Intent(BaseActivity.this, MainActivity.class);
-                                startActivity(intent);
-                                break;
-                            case R.id.nav_recordings:
-                                intent = new Intent(BaseActivity.this, RecordingsActivity.class);
-                                startActivity(intent);
-                                break;
-//                            case R.id.nav_weekly_notifications:
-//                                intent = new Intent(BaseActivity.this, WeeklyNotificationsActivity.class);
-//                                startActivity(intent);
-//                                break;
-                            case R.id.nav_settings:
-                                intent = new Intent(BaseActivity.this, SettingsActivity.class);
-                                startActivity(intent);
-                                break;
-                        }
-
-                        // close drawer when item is tapped
-                        mDrawer.closeDrawers();
-
-                        // Add code here to update the UI based on the item selected
-                        // For example, swap UI fragments here
-
-                        return true;
+                    switch (id) {
+                        case R.id.nav_recorder:
+                            intent = new Intent(BaseActivity.this, MainActivity.class);
+                            startActivity(intent);
+                            break;
+                        case R.id.nav_recordings:
+                            intent = new Intent(BaseActivity.this, RecordingsActivity.class);
+                            startActivity(intent);
+                            break;
+                        case R.id.nav_settings:
+                            intent = new Intent(BaseActivity.this, SettingsActivity.class);
+                            startActivity(intent);
+                            break;
                     }
+
+                    // close drawer when item is tapped
+                    mDrawer.closeDrawers();
+
+                    // Add code here to update the UI based on the item selected
+                    // For example, swap UI fragments here
+
+                    return true;
                 });
 
         mDrawer.addDrawerListener(

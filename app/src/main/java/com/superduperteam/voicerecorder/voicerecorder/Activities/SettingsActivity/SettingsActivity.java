@@ -1,4 +1,4 @@
-package com.superduperteam.voicerecorder.voicerecorder.activities.settingsActivity;
+package com.superduperteam.voicerecorder.voicerecorder.Activities.SettingsActivity;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -6,10 +6,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceFragmentCompat;
 
-import com.superduperteam.voicerecorder.voicerecorder.BaseActivity;
+import com.superduperteam.voicerecorder.voicerecorder.Activities.BaseActivity.BaseActivity;
 import com.superduperteam.voicerecorder.voicerecorder.R;
 
 public class SettingsActivity extends BaseActivity {

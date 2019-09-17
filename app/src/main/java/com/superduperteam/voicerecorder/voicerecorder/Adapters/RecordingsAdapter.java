@@ -1,4 +1,4 @@
-package com.superduperteam.voicerecorder.voicerecorder.activities;
+package com.superduperteam.voicerecorder.voicerecorder.Adapters;
 
 import android.content.Context;
 import android.content.Intent;
@@ -9,13 +9,16 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ExpandableListView;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.superduperteam.voicerecorder.voicerecorder.Model.Bookmark;
+import com.superduperteam.voicerecorder.voicerecorder.Interfaces.OnChildClickListener;
+import com.superduperteam.voicerecorder.voicerecorder.Model.Recording;
 import com.superduperteam.voicerecorder.voicerecorder.R;
+import com.superduperteam.voicerecorder.voicerecorder.Activities.RecordingPlayerActivity.RecordingPlayerActivity;
 import com.thoughtbot.expandablerecyclerview.listeners.OnGroupClickListener;
 import com.thoughtbot.expandablerecyclerview.models.ExpandableGroup;
 import com.thoughtbot.expandablerecyclerview.models.ExpandableList;
@@ -25,18 +28,13 @@ import com.thoughtbot.expandablerecyclerview.viewholders.GroupViewHolder;
 
 import java.io.File;
 import java.io.IOException;
-import java.security.acl.Group;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 public class RecordingsAdapter extends CustomExpandableRecyclerViewAdapter<RecordingsAdapter.RecordingViewHolder, RecordingsAdapter.BookmarkViewHolder> implements OnChildClickListener {
-    private View.OnClickListener bookmarkClickListener;
     private Context context;
     private RecyclerView rv;
     private static final String LOG_TAG = "AudioRecordTest";
-    private ExpandableList recordings;
-    private LayoutInflater mInflater;
     private MediaMetadataRetriever mmr;
     private MediaPlayer player = new MediaPlayer();
     private int recordingToResumePosition = -1; //-1 means not recording was paused and should be resumed
@@ -59,8 +57,7 @@ public class RecordingsAdapter extends CustomExpandableRecyclerViewAdapter<Recor
         recordingViewHolder.setOnGroupClickListener(this);
         return recordingViewHolder;
       case ExpandableListPosition.CHILD:
-        BookmarkViewHolder bookmarkViewHolder = onCreateChildViewHolder(parent, viewType);
-        return bookmarkViewHolder;
+          return onCreateChildViewHolder(parent, viewType);
       default:
         throw new IllegalArgumentException("viewType is not valid");
     }
@@ -91,13 +88,6 @@ public class RecordingsAdapter extends CustomExpandableRecyclerViewAdapter<Recor
         holder.setBookmarkText(bookmark.getTitle());
         holder.setTimeText(convertMilliSecondsToRecordingTime(bookmark.getTimestamp()));
         holder.setBookmark(bookmark);
-//      holder.itemView.setOnClickListener(new View.OnClickListener() {
-//          @Override
-//          public void onClick(View v) {
-////              Bookmark bookmark = ((Recording) group).getItems().get(childPosition);
-////              createIntentForRecordingPlayer(bookmark.getTimestamp().intValue(), groupPosition);
-//          }
-//      });
   }
 
   @Override
@@ -140,12 +130,9 @@ public class RecordingsAdapter extends CustomExpandableRecyclerViewAdapter<Recor
         String month = unFormattedDate.substring(MONTH_START_INDEX, MONTH_END_INDEX);
         String year = unFormattedDate.substring(YEAR_START_INDEX, YEAR_END_INDEX);
 
-        String date = new StringBuilder()
-                .append(day).append("/")
-                .append(month).append("/")
-                .append(year).toString();
-
-        return date;
+        return day + "/" +
+                month + "/" +
+                year;
     }
 
     private String convertMilliSecondsToRecordingTime(long milliseconds) {
@@ -172,82 +159,14 @@ public class RecordingsAdapter extends CustomExpandableRecyclerViewAdapter<Recor
         ((List<Recording>)getGroups()).addAll(groups);
         notifyGroupDataChanged();
         notifyDataSetChanged();
-
-//        expandAll();
- //       expandRecordingGroupsThatShouldBeExpanded();
-//        notifyGroupDataChanged();
     }
 
-
-    private void expandRecordingGroupsThatShouldBeExpanded() {
-//        togglGroupsThatShouldBeExpanded1();
-
-//        for(ExpandableGroup recordingGroup : getGroups()){
-//            if(((Recording) recordingGroup).isShouldExpand()){
-//                if(!isGroupExpanded(recordingGroup)){
-//                    boolean isExpanded = toggleGroup(recordingGroup);
-//                    System.out.println(isExpanded);
-//                }
-//            }
-//        }
-//        for(int i=0; i<getGroups().size(); i++){
-//            Recording currRecording = (Recording)getGroups().get(i);
-//            if(currRecording.isShouldExpand()){
-//                if(!isGroupExpanded(getGroups().get(i))){
-////                    boolean isExpanded = toggleGroup(getGroups().get(i));
-////                    System.out.println(isExpanded);
-//
-//                }
-//
-//            }
-//        }
-//        for(int i=0; i<getGroups().size();i++){
-//
-//        }
-    }
-
-    public void notifyGroupDataChanged() {
+    private void notifyGroupDataChanged() {
         expandableList.expandedGroupIndexes = new boolean[getGroups().size()];
         for (int i = 0; i < getGroups().size(); i++) {
             expandableList.expandedGroupIndexes[i] = false;
         }
     }
-
-    public void togglGroupsThatShouldBeExpanded1() {
-        for (int i = 0; i < getGroups().size(); i++) {
-            toggleGroup(getFlattenedGroupPosition(i));
-        }
-    }
-
-    public int getFlattenedGroupPosition(int groupIndex) {
-        int runningTotal = 0;
-        for (int i = 0; i < groupIndex; i++) {
-            runningTotal += numberOfVisibleItemsInGroup(i);
-        }
-        return runningTotal;
-    }
-
-    private int numberOfVisibleItemsInGroup(int group) {
-        boolean[] clone = expandableList.expandedGroupIndexes.clone();
-        if (clone[group]) {
-            return expandableList.groups.get(group).getItemCount() + 1;
-        } else {
-            return 1;
-        }
-    }
-
-//    public void expandAll() {
-//        for (int i = 0; i < getItemCount(); i++) {
-//            if (!isGroupExpanded(i)){
-//                toggleGroup(i);
-//            }
-//        }
-//    }
-
-//    public void updateList(List<Recording> newList){
-//        this.expandableList = new ExpandableList(newList);
-//        notifyDataSetChanged();
-//    }
 
   @Override
   public boolean onGroupClick(int flatPos) {
@@ -261,15 +180,6 @@ public class RecordingsAdapter extends CustomExpandableRecyclerViewAdapter<Recor
         }
         return null;
   }
-
-//    @Override
-//    public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
-//        ExpandableGroup group = expandableList.groups.get(groupPosition);
-//        Bookmark bookmark = ((Recording) group).getItems().get(childPosition);
-//        createIntentForRecordingPlayer(bookmark.getTimestamp().intValue(), groupPosition);
-//        return true;
-//    }
-
 
     private void createIntentForRecordingPlayer(int startTimestamp, Recording recording) {
 
@@ -297,95 +207,68 @@ public class RecordingsAdapter extends CustomExpandableRecyclerViewAdapter<Recor
                 }
             }
         }
-
-
-//        ExpandableGroup group = getFlattenedGroupPosition();
-//
-//        Bookmark bookmark = ((Recording) group).getItems().get(childPosition);
-//        createIntentForRecordingPlayer(bookmark.getTimestamp().intValue(), groupPosition);
-//        createIntentForRecordingPlayer();
-
-//        getItem()
     }
 
-
-//    private int getChildItemIndex(int index){
-//
-//    }
-
-    ////////////////// INNER CLASS /////////////////
     public class RecordingViewHolder extends GroupViewHolder {
       TextView recordingDate;
       TextView recordingNameTextView;
       TextView recordingDurationTextView;
       TextView recordingBookmarksCount;
       ImageButton playButton;
-      private ImageButton bookmarksExpandButton;
-      private OnGroupClickListener listener;
-     // private ImageView icon;
 
-      public RecordingViewHolder(View itemView) {
+      RecordingViewHolder(View itemView) {
           super(itemView);
           recordingNameTextView = itemView.findViewById(R.id.recordingTitle);
           recordingDurationTextView = itemView.findViewById(R.id.recordingDuration);
           recordingDate = itemView.findViewById(R.id.recordingDate);
           recordingBookmarksCount = itemView.findViewById(R.id.recordingBookmarksCount2);
           playButton = itemView.findViewById(R.id.recordingsPlayImagePlace);
-          bookmarksExpandButton = itemView.findViewById(R.id.recordingBookmarksPlace);
+          ImageButton bookmarksExpandButton = itemView.findViewById(R.id.recordingBookmarksPlace);
           bookmarksExpandButton.setOnClickListener(this);
-          bookmarksExpandButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-              int position = getAdapterPosition();
-              toggleGroup(position);
-            }
+          bookmarksExpandButton.setOnClickListener(v -> {
+            int position = getAdapterPosition();
+            toggleGroup(position);
           });
 
-          playButton.setOnClickListener(new View.OnClickListener() {
-              @Override
-              public void onClick(View view) {
-                  int position = getAdapterPosition();
-                  File fileToPlay = getItem(position).getFile();
+          playButton.setOnClickListener(view -> {
+              int position = getAdapterPosition();
+              File fileToPlay = getItem(position).getFile();
 
-                  player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                      @Override
-                      public void onCompletion(MediaPlayer mediaPlayer) {
-                          mediaPlayer.reset();
-                          recordingToResumePosition = -1;
-                          shouldSetDataSource = true;
-                          playButton.setBackgroundResource(R.drawable.ic_play_arrow_triangle_alt1);
-                      }
-                  });
+              player.setOnCompletionListener(mediaPlayer -> {
+                  mediaPlayer.reset();
+                  recordingToResumePosition = -1;
+                  shouldSetDataSource = true;
+                  playButton.setBackgroundResource(R.drawable.ic_play_arrow_triangle_alt1);
+              });
 
-                  if(player.isPlaying() && recordingToResumePosition != position) {
-                      player.reset();
-                      recordingToResumePosition = -1;
-                      shouldSetDataSource = true;
-                      playButton.setBackgroundResource(R.drawable.ic_play_arrow_triangle_alt1);
-                      lastPlayed.setBackgroundResource(R.drawable.ic_play_arrow_triangle_alt1);
-                  }
-                  else if(player.isPlaying() && recordingToResumePosition == position) {
-                      player.pause();
-                      System.out.println("paused");
-                      shouldSetDataSource = false;
-                      playButton.setBackgroundResource(R.drawable.ic_play_arrow_triangle_alt1);
-                  }
-                  else {
-                      try {
-                          System.out.println("going to start..");
-                          recordingToResumePosition = position;
-                          if(shouldSetDataSource) {
-                              player.setDataSource(fileToPlay.getAbsolutePath());
-                              player.prepare();
-                          }
-                          player.start();
-                          lastPlayed = playButton;
-                          playButton.setBackgroundResource(R.drawable.ic_pause_circle_outline_black_24dp);
-                          System.out.print("duration: ");
-                          System.out.println(player.getDuration());
-                      } catch (IOException e) {
-                          Log.e(LOG_TAG, "prepare() failed");
+              if(player.isPlaying() && recordingToResumePosition != position) {
+                  player.reset();
+                  recordingToResumePosition = -1;
+                  shouldSetDataSource = true;
+                  playButton.setBackgroundResource(R.drawable.ic_play_arrow_triangle_alt1);
+                  lastPlayed.setBackgroundResource(R.drawable.ic_play_arrow_triangle_alt1);
+              }
+              else if(player.isPlaying() && recordingToResumePosition == position) {
+                  player.pause();
+                  System.out.println("paused");
+                  shouldSetDataSource = false;
+                  playButton.setBackgroundResource(R.drawable.ic_play_arrow_triangle_alt1);
+              }
+              else {
+                  try {
+                      System.out.println("going to start..");
+                      recordingToResumePosition = position;
+                      if(shouldSetDataSource) {
+                          player.setDataSource(fileToPlay.getAbsolutePath());
+                          player.prepare();
                       }
+                      player.start();
+                      lastPlayed = playButton;
+                      playButton.setBackgroundResource(R.drawable.ic_pause_circle_outline_black_24dp);
+                      System.out.print("duration: ");
+                      System.out.println(player.getDuration());
+                  } catch (IOException e) {
+                      Log.e(LOG_TAG, "prepare() failed");
                   }
               }
           });
@@ -394,13 +277,6 @@ public class RecordingsAdapter extends CustomExpandableRecyclerViewAdapter<Recor
 
       @Override
       public void onClick(View v) {
-//          if (listener != null) {
-//              if (listener.onGroupClick(getAdapterPosition())) {
-//                  collapse();
-//              } else {
-//                  expand();
-//              }
-
           player.reset();
           recordingToResumePosition = -1;
           shouldSetDataSource = true;
@@ -413,94 +289,45 @@ public class RecordingsAdapter extends CustomExpandableRecyclerViewAdapter<Recor
 
         @Override
       public void setOnGroupClickListener(OnGroupClickListener listener) {
-          this.listener = listener;
-      }
+        }
 
-      public void setRecordingTitle(ExpandableGroup recording) {
+      void setRecordingTitle(ExpandableGroup recording) {
               recordingNameTextView.setText(recording.getTitle());
       }
-
-  //    @Override
-  //    public void expand() {
-  //        animateExpand();
-  //    }
-  //
-  //    @Override
-  //    public void collapse() {
-  //        animateCollapse();
-  //    }
-  //
-  //    private void animateExpand() {
-  //        RotateAnimation rotate =
-  //                new RotateAnimation(360, 180, RELATIVE_TO_SELF, 0.5f, RELATIVE_TO_SELF, 0.5f);
-  //        rotate.setDuration(300);
-  //        rotate.setFillAfter(true);
-  //        arrow.setAnimation(rotate);
-  //    }
-  //
-  //    private void animateCollapse() {
-  //        RotateAnimation rotate =
-  //                new RotateAnimation(180, 360, RELATIVE_TO_SELF, 0.5f, RELATIVE_TO_SELF, 0.5f);
-  //        rotate.setDuration(300);
-  //        rotate.setFillAfter(true);
-  //        arrow.setAnimation(rotate);
-  //    }
   }
 
-//    public class MyOnClickListener implements View.OnClickListener {
-//        @Override
-//        public void onClick(View v) {
-//            int itemPosition = rv.getChildLayoutPosition(v);
-//
-//            expandableList.getExpandableGroup(0).getItems()
-//            Bookmark bookmarkClicked = bookmarks.get(itemPosition);
-////            String time = convertMilliSecondsToRecordingTime(bookmarkClicked.getTimestamp());
-//            Integer timestamp = Integer.getInteger(bookmarkClicked.getTimestamp().toString());
-//
-//            bookmarkClickedListener.OnClick(bookmarkClicked.getTimestamp().intValue());
-//        }
-//    }
 
-    static class BookmarkViewHolder extends ChildViewHolder{
+    static class BookmarkViewHolder extends ChildViewHolder {
         private TextView childTextView;
         private TextView textViewTime;
         private OnChildClickListener listener;
 
         private Bookmark bookmark;
 
-        public BookmarkViewHolder(View itemView) {
+        BookmarkViewHolder(View itemView) {
             super(itemView);
             childTextView = itemView.findViewById(R.id.bookmark_name);
             textViewTime = itemView.findViewById(R.id.bookmark_time);
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (listener != null) {
-                        int groupPosition; // TODO: 9/1/2019 saar: need to find a way to get the his parent group
-                        listener.onChildClick(bookmark);
-                    }
+            itemView.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onChildClick(bookmark);
                 }
             });
         }
 
-        public Bookmark getBookmark() {
-            return bookmark;
-        }
-
-        public void setBookmark(Bookmark bookmark) {
+        void setBookmark(Bookmark bookmark) {
             this.bookmark = bookmark;
         }
 
-
-        public void setListener(OnChildClickListener listener) {
+        void setListener(OnChildClickListener listener) {
             this.listener = listener;
         }
 
-        public void setBookmarkText(Spannable name) {
+        void setBookmarkText(Spannable name) {
             childTextView.setText(name);
         }
 
-        public void setTimeText(String time) {
+        void setTimeText(String time) {
             this.textViewTime.setText(time);
         }
     }
