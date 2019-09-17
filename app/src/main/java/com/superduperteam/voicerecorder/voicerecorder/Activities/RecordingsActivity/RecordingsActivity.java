@@ -309,7 +309,6 @@ public class RecordingsActivity extends BaseActivity implements SearchView.OnQue
 
                 return true;
             case R.id.share_bookmarks:
-                String bookmarks = null;
                 List<Bookmark> bookmarksList = new ArrayList<>();
                 MetaDataRead cmd = new MetaDataRead();
                 String bookmarksRawData, currLine;
@@ -345,7 +344,6 @@ public class RecordingsActivity extends BaseActivity implements SearchView.OnQue
                     e.printStackTrace();
                 }
                 File file1 = new File(Objects.requireNonNull(getExternalFilesDir(null)).getAbsolutePath() + "bookmarks.json");
-                Path filePath = Paths.get(file1.getPath());
                 FileWriter writer = null;
                 try {
                     writer = new FileWriter(bookmarkFile);
