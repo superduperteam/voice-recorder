@@ -259,10 +259,10 @@ public class RecordingsActivity extends BaseActivity implements SearchView.OnQue
         int numberOfChildren = ((RecyclerView) parentOfRadioButtons).getChildCount();
 
         for (int i = 0; i < numberOfChildren; i += 1) {
-            RadioButton radioButton = ((RadioButton) ((RecyclerView) parentOfRadioButtons).findViewHolderForLayoutPosition(i).itemView.getTouchables().get(4));
+            RadioButton radioButton = ((RadioButton) Objects.requireNonNull(((RecyclerView) parentOfRadioButtons).findViewHolderForLayoutPosition(i)).itemView.getTouchables().get(4));
 
             if (radioButton != checkedRadio) {
-                ((RadioButton) ((RecyclerView) parentOfRadioButtons).findViewHolderForLayoutPosition(i).itemView.getTouchables().get(4)).setChecked(false);
+                ((RadioButton) Objects.requireNonNull(((RecyclerView) parentOfRadioButtons).findViewHolderForLayoutPosition(i)).itemView.getTouchables().get(4)).setChecked(false);
             }
         }
     }
